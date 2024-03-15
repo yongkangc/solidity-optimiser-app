@@ -2,7 +2,47 @@
 
 ## Setup
 
-Running the program: `cargo run`
+### Golang
+`go mod download`
+
+
+### Solc
+To get Solidity compiler releases and ensure that the `{HOME}/.solc/releases` directory exists, you can follow these steps:
+
+1. Open a terminal or command prompt.
+
+2. Create the directory structure for Solidity compiler releases by running the following command:
+   ```
+   mkdir -p ~/.solc/releases
+   ```
+   This command will create the `releases` directory inside `~/.solc` (`{HOME}/.solc`) if it doesn't already exist.
+
+3. Download the desired Solidity compiler release from the official Solidity releases page on GitHub:
+   - Go to the Solidity releases page: [https://github.com/ethereum/solidity/releases](https://github.com/ethereum/solidity/releases)
+   - Choose the release version you want to download (e.g., `v0.8.4`).
+   - Scroll down to the "Assets" section and download the appropriate binary for your operating system (e.g., `solc-windows.exe`, `solc-macos`, `solc-static-linux`).
+
+4. Move the downloaded Solidity compiler binary to the `{HOME}/.solc/releases` directory. For example, if you downloaded `solc-macos` for macOS, you can move it using the following command:
+   ```
+   mv ~/Downloads/solc-macos ~/.solc/releases/solc-v0.8.4
+   ```
+   Make sure to replace `v0.8.4` with the actual version you downloaded.
+
+5. (Optional) Create a symbolic link to the downloaded Solidity compiler binary for easier access. For example:
+   ```
+   ln -s ~/.solc/releases/solc-v0.8.4 ~/.solc/solc
+   ```
+   This creates a symbolic link named `solc` in the `~/.solc` directory that points to the specific version of the Solidity compiler you downloaded.
+
+6. Verify that the Solidity compiler is installed correctly by running the following command:
+   ```
+   ~/.solc/solc --version
+   ```
+   It should display the version of the Solidity compiler you downloaded.
+
+By following these steps, you will have downloaded the desired Solidity compiler release and ensured that the `{HOME}/.solc/releases` directory exists with the compiler binary inside it.
+
+Note: Make sure to replace `{HOME}` with the actual path to your home directory if necessary.
 
 ## Design
 
