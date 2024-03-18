@@ -3,7 +3,12 @@ module optimizer/optimizer
 go 1.21.1
 
 require (
-	github.com/0x19/solc-switch v1.0.3 // indirect
+	github.com/0x19/solc-switch v1.0.3
+	github.com/unpackdev/solgo v0.0.0-00010101000000-000000000000
+	go.uber.org/zap v1.27.0
+)
+
+require (
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/cncf/xds/go v0.0.0-20230607035331-e9ce68804cb4 // indirect
@@ -24,14 +29,12 @@ require (
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/unpackdev/protos v0.3.2 // indirect
-	github.com/unpackdev/solgo v0.3.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto v0.0.0-20230920204549-e6e6cdab5c13 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230920204549-e6e6cdab5c13 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230920204549-e6e6cdab5c13 // indirect
@@ -39,3 +42,5 @@ require (
 	google.golang.org/protobuf v1.31.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 )
+
+replace github.com/unpackdev/solgo => github.com/ExtremelySunnyYK/solgo v0.0.0-20231223180605-162e6460afd8
