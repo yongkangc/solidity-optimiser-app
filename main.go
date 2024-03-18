@@ -24,13 +24,31 @@ func main() {
 
 	ast := getAST(detector)
 
-	zap.S().Infof("AST: %v", ast)
+	// tree_str, _ := ast.GetTree().ToJSON()
+	// zap.S().Infof("AST: %v", string(tree_str))
+
+	// sourceUnits := ast.GetCurrentSourceUnits()
+	// jsonStruct, _ := json.Marshal(sourceUnits)
+
+	// zap.S().Infof("Source Units: %v", string(jsonStruct))
+	// zap.S().Infof("AST: %v", ast.)
+
+	printCode(ast.GetRoot())
 
 	// // Traverse the AST and print the nodes with dfs
 	// for _, node := range tree.GetChildren() {
 	// 	zap.S().Infof("Node: %v", node.GetChildCount())
 	// }
 
+}
+
+// printSourceCode prints the source code of the contract.
+func printCode(root *ast.RootNode) {
+	// zap.S().Infof("Source Units: %v", len(root))
+	nodes := root.GetNodes()
+	for _, node := range nodes {
+		zap.S().Infof("Node: %v", node)
+	}
 }
 
 func getAST(detector *detector.Detector) *ast.ASTBuilder {
