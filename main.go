@@ -26,15 +26,6 @@ func main() {
 
 	ast := getAST(detector)
 
-	// tree_str, _ := ast.GetTree().ToJSON()
-	// zap.S().Infof("AST: %v", string(tree_str))
-
-	// sourceUnits := ast.GetCurrentSourceUnits()
-	// jsonStruct, _ := json.Marshal(sourceUnits)
-
-	// zap.S().Infof("Source Units: %v", string(jsonStruct))
-	// zap.S().Infof("AST: %v", ast.)
-
 	// Create a new Printer
 	printer_new := printer.New()
 
@@ -43,8 +34,6 @@ func main() {
 	printer_new.Print(rootNode)
 	fmt.Println(printer_new.Output())
 
-	// Previous code
-	// printer.PrintCode(rootNode)
 }
 
 func getAST(detector *detector.Detector) *ast.ASTBuilder {
