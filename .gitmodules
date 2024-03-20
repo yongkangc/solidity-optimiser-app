@@ -1,0 +1,3 @@
+[submodule "solgo"]
+	path = solgo
+	url = https://github.com/yongkangc/solgo
