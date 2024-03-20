@@ -118,7 +118,8 @@ func (p *Printer) VisitContractDefinition(contract *ast.Contract, depth int) {
 }
 
 func (p *Printer) VisitStructDefinition(structDef *ast.StructDefinition, depth int) {
-	p.output += fmt.Sprintf("%s%s\n", strings.Repeat("  ", depth), structDef.Name)
+	indent := strings.Repeat("    ", depth)
+	p.output += fmt.Sprintf("%sstruct %s {\n", indent, structDef.Name)
 }
 
 func (p *Printer) VisitVariableDeclaration(variable *ast.Parameter, depth int) {
