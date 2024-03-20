@@ -2,6 +2,7 @@ package printer
 
 import (
 	"fmt"
+	"strings"
 
 	ast_pb "github.com/unpackdev/protos/dist/go/ast"
 	"github.com/unpackdev/solgo/ast"
@@ -9,12 +10,14 @@ import (
 
 // Printer prints out the code based on the AST
 type Printer struct {
-	output string
+	output  string
+	visited map[ast.Node[ast.NodeType]]bool
 }
 
 func New() *Printer {
 	return &Printer{
-		output: "",
+		output:  "",
+		visited: make(map[ast.Node[ast.NodeType]]bool),
 	}
 }
 
@@ -30,7 +33,11 @@ func (p *Printer) Print(root *ast.RootNode) {
 
 func (p *Printer) traverseNodes(nodes []ast.Node[ast.NodeType], depth int) {
 	for _, node := range nodes {
-		p.visitNode(node)
+		if p.visited[node] {
+			continue
+		}
+		p.visited[node] = true
+		p.visitNode(node, depth)
 		childNodes := node.GetNodes()
 		if len(childNodes) > 0 {
 			p.traverseNodes(childNodes, depth+1)
@@ -38,68 +45,64 @@ func (p *Printer) traverseNodes(nodes []ast.Node[ast.NodeType], depth int) {
 	}
 }
 
-func (p *Printer) visitNode(node ast.Node[ast.NodeType]) {
-
+func (p *Printer) visitNode(node ast.Node[ast.NodeType], depth int) {
 	switch node.GetType() {
 	case ast_pb.NodeType_SOURCE_UNIT:
 		n := node.(*ast.SourceUnit[ast.Node[ast_pb.SourceUnit]])
-		p.VisitSourceUnit(n)
+		p.VisitSourceUnit(n, depth)
 	case ast_pb.NodeType_PRAGMA_DIRECTIVE:
 		n := node.(*ast.Pragma)
-		p.VisitPragma(n)
+		p.VisitPragma(n, depth)
 	case ast_pb.NodeType_IMPORT_DIRECTIVE:
 		n := node.(*ast.Import)
-		p.VisitImport(n)
+		p.VisitImport(n, depth)
 	case ast_pb.NodeType_MODIFIER_DEFINITION:
 		n := node.(*ast.ModifierDefinition)
-		p.VisitModifierDefinition(n)
+		p.VisitModifierDefinition(n, depth)
 	case ast_pb.NodeType_FUNCTION_DEFINITION:
 		n := node.(*ast.Function)
-		p.VisitFunctionDefinition(n)
+		p.VisitFunctionDefinition(n, depth)
 	case ast_pb.NodeType_CONTRACT_DEFINITION:
 		n := node.(*ast.Contract)
-		p.VisitContractDefinition(n)
+		p.VisitContractDefinition(n, depth)
 	case ast_pb.NodeType_STRUCT_DEFINITION:
 		n := node.(*ast.StructDefinition)
-		p.VisitStructDefinition(n)
+		p.VisitStructDefinition(n, depth)
 	case ast_pb.NodeType_VARIABLE_DECLARATION:
 		n := node.(*ast.Parameter)
-		p.VisitVariableDeclaration(n)
+		p.VisitVariableDeclaration(n, depth)
 	case ast_pb.NodeType_ELEMENTARY_TYPE_NAME:
 		n := node.(*ast.TypeName)
-		p.VisitTypeName(n)
+		p.VisitTypeName(n, depth)
 	default:
 		p.output += fmt.Sprintf("Unknown Node: %v\n", node.GetType().String())
 		println("%sUnknown Node: %v", node.GetType().String())
-
 	}
 }
 
-func (p *Printer) VisitSourceUnit(sourceUnit *ast.SourceUnit[ast.Node[ast_pb.SourceUnit]]) {
-	p.output += fmt.Sprintf("SourceUnit: %s\n", sourceUnit.Name)
-	for _, node := range sourceUnit.GetNodes() {
-		p.visitNode(node)
-	}
+func (p *Printer) VisitSourceUnit(sourceUnit *ast.SourceUnit[ast.Node[ast_pb.SourceUnit]], depth int) {
+	return
 }
 
-func (p *Printer) VisitPragma(pragma *ast.Pragma) {
-	p.output += fmt.Sprintf("Pragma: %s\n", pragma.GetText())
+func (p *Printer) VisitPragma(pragma *ast.Pragma, depth int) {
+	p.output += fmt.Sprintf("%sPragma: %s\n", strings.Repeat("  ", depth), pragma.GetText())
 }
 
-func (p *Printer) VisitImport(imp *ast.Import) {
-	p.output += fmt.Sprintf("Import: %s\n", imp.GetName())
+func (p *Printer) VisitImport(imp *ast.Import, depth int) {
+	p.output += fmt.Sprintf("%sImport: %s\n", strings.Repeat("  ", depth), imp.GetName())
 }
 
-func (p *Printer) VisitModifierDefinition(modifierDef *ast.ModifierDefinition) {
-	p.output += fmt.Sprintf("Modifier: %s\n", modifierDef.Name)
+func (p *Printer) VisitModifierDefinition(modifierDef *ast.ModifierDefinition, depth int) {
+	p.output += fmt.Sprintf("%sModifier: %s\n", strings.Repeat("  ", depth), modifierDef.Name)
 }
 
-func (p *Printer) VisitFunctionDefinition(function *ast.Function) {
-	p.output += fmt.Sprintf("Function: %s\n", function.Name)
+func (p *Printer) VisitFunctionDefinition(function *ast.Function, depth int) {
+	p.output += fmt.Sprintf("%sFunction: %s\n", strings.Repeat("  ", depth), function.Name)
 }
 
-func (p *Printer) VisitContractDefinition(contract *ast.Contract) {
-	p.output += fmt.Sprintf("Contract: %s", contract.Name)
+func (p *Printer) VisitContractDefinition(contract *ast.Contract, depth int) {
+	indent := strings.Repeat("  ", depth)
+	p.output += fmt.Sprintf("%sContract: %s", indent, contract.Name)
 	if contract.BaseContracts != nil {
 		p.output += " is "
 		for i, base := range contract.BaseContracts {
@@ -110,22 +113,20 @@ func (p *Printer) VisitContractDefinition(contract *ast.Contract) {
 		}
 	}
 	p.output += " {\n"
-	for _, part := range contract.Nodes {
-		p.visitNode(part)
-	}
-	p.output += "}\n"
+	p.traverseNodes(contract.Nodes, depth+1)
+	p.output += fmt.Sprintf("%s}\n", indent)
 }
 
-func (p *Printer) VisitStructDefinition(structDef *ast.StructDefinition) {
-	p.output += fmt.Sprintf("%s\n", structDef.Name)
+func (p *Printer) VisitStructDefinition(structDef *ast.StructDefinition, depth int) {
+	p.output += fmt.Sprintf("%s%s\n", strings.Repeat("  ", depth), structDef.Name)
 }
 
-func (p *Printer) VisitVariableDeclaration(variable *ast.Parameter) {
-	p.output += fmt.Sprintf("%s\n", variable.Name)
+func (p *Printer) VisitVariableDeclaration(variable *ast.Parameter, depth int) {
+	p.output += fmt.Sprintf("%s%s\n", strings.Repeat("  ", depth), variable.Name)
 }
 
-func (p *Printer) VisitTypeName(typeName *ast.TypeName) {
-	p.output += fmt.Sprintf("TypeName: %s\n", typeName.Name)
+func (p *Printer) VisitTypeName(typeName *ast.TypeName, depth int) {
+	p.output += fmt.Sprintf("%sTypeName: %s\n", strings.Repeat("  ", depth), typeName.Name)
 }
 
 /// Previous implementation of the printer
