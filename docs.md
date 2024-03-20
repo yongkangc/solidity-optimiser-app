@@ -4,7 +4,9 @@
 
 ### Golang
 
-`go mod download`
+download dependencies: `go mod download`
+
+update submodules: `make update-submodules`
 
 ### Solc
 
