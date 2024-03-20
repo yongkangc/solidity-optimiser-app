@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/0x19/solc-switch"
+	ast_pb "github.com/unpackdev/protos/dist/go/ast"
 	"github.com/unpackdev/solgo"
 	"github.com/unpackdev/solgo/ast"
 	"github.com/unpackdev/solgo/detector"
@@ -84,89 +85,37 @@ func printNode(node ast.Node[ast.NodeType], depth int) string {
 	indent := strings.Repeat("  ", depth)
 	var nodeStr string
 
-	switch n := node.(type) {
-	// case *ast.Comment:
-	// 	nodeStr = fmt.Sprintf("%sComment: %s", indent, n.GetText())
-	case *ast.Pragma:
+	switch node.GetType() {
+	case ast_pb.NodeType_PRAGMA_DIRECTIVE:
+		n := node.(*ast.Pragma)
 		nodeStr = fmt.Sprintf("%sPragma: %s", indent, n.GetText())
-	case *ast.Import:
-		nodeStr = fmt.Sprintf("%sImport: %s", indent, n.GetName())
-	case *ast.ModifierDefinition:
-		nodeStr = fmt.Sprintf("%sModifier: %s", indent, n.Name)
-	// case *ast.SourceUnit:
-	// 	nodeStr = fmt.Sprintf("%sSourceUnit: %s", indent, n.AbsolutePath)
-	case *ast.Function:
-		nodeStr = fmt.Sprintf("%sFunction: %s", indent, n.Name)
-	case *ast.Contract:
-		nodeStr = fmt.Sprintf("%sContract: %s", indent, n.Name)
-	case *ast.StructDefinition:
-		nodeStr = fmt.Sprintf("%sStruct: %s", indent, n.Name)
-	case *ast.VariableDeclaration:
-		// nodeStr = fmt.Sprintf("%sVariableDeclaration: %s", indent, n.Src)
-		println("Varaible DECL", n.Assignments)
-	case *ast.TypeName:
-		nodeStr = fmt.Sprintf("%sTypeName: %s", indent, n.Name)
-	case *ast.StateVariableDeclaration:
-		nodeStr = fmt.Sprintf("%sStateVariableDeclaration: %s", indent, n.Name)
-	// case *ast.Statement:
-	// 	nodeStr = fmt.Sprintf("%sStatement: %s", indent, n.GetText())
-	// case *ast.Body:
-	// 	nodeStr = fmt.Sprintf("%sBody: %s", indent, n.GetText())
-	// case *ast.Variable:
-	// 	nodeStr = fmt.Sprintf("%sVariable: %s", indent, n.Name)
-	// case *ast.PrimaryExpression:
-	// 	nodeStr = fmt.Sprintf("%sPrimaryExpression: %s", indent, n.GetText())
-	// case *ast.Expression:
-	// 	nodeStr = fmt.Sprintf("%sExpression: %s", indent, n.GetText())
-	// case *ast.Using:
-	// 	nodeStr = fmt.Sprintf("%sUsing: %s", indent, n.LibraryName)
-	// case *ast.Declaration:
-	// 	nodeStr = fmt.Sprintf("%sDeclaration: %s", indent, n.GetText())
-	// case *ast.TypeName:
+	// case ast.NodeTypeImport:
+	// 	n := node.(*ast.Import)
+	// 	nodeStr = fmt.Sprintf("%sImport: %s", indent, n.GetName())
+	// case ast.NodeTypeModifierDefinition:
+	// 	n := node.(*ast.ModifierDefinition)
+	// 	nodeStr = fmt.Sprintf("%sModifier: %s", indent, n.Name)
+	// case ast.NodeTypeFunction:
+	// 	n := node.(*ast.Function)
+	// 	nodeStr = fmt.Sprintf("%sFunction: %s", indent, n.Name)
+	// case ast.NodeTypeContract:
+	// 	n := node.(*ast.Contract)
+	// 	nodeStr = fmt.Sprintf("%sContract: %s", indent, n.Name)
+	// case ast.NodeTypeStructDefinition:
+	// 	n := node.(*ast.StructDefinition)
+	// 	nodeStr = fmt.Sprintf("%sStruct: %s", indent, n.Name)
+	// case ast.NodeTypeVariableDeclaration:
+	// 	n := node.(*ast.VariableDeclaration)
+	// 	nodeStr = fmt.Sprintf("%sVariableDeclaration: %s", indent, n.Src)
+	// case ast.NodeTypeTypeName:
+	// 	n := node.(*ast.TypeName)
 	// 	nodeStr = fmt.Sprintf("%sTypeName: %s", indent, n.Name)
-	// case *ast.BaseContract:
-	// 	nodeStr = fmt.Sprintf("%sBaseContract: %s", indent, n.BaseName.Name)
-	// case *ast.TypeDescription:
-	// 	nodeStr = fmt.Sprintf("%sTypeDescription: %s", indent, n.TypeName)
-	// case *ast.BinaryOperation:
-	// 	nodeStr = fmt.Sprintf("%sBinaryOperation: %s", indent, n.Operator)
-	// case *ast.Return:
-	// 	nodeStr = fmt.Sprintf("%sReturn: %s", indent, n.GetText())
-	// case *ast.ParameterList:
-	// 	nodeStr = fmt.Sprintf("%sParameterList: %d parameters", indent, len(n.Parameters))
-	// case *ast.Parameter:
-	// 	nodeStr = fmt.Sprintf("%sParameter: %s", indent, n.Name)
-	// case *ast.StateVariable:
-	// 	nodeStr = fmt.Sprintf("%sStateVariable: %s", indent, n.Name)
-	// case *ast.Event:
-	// 	nodeStr = fmt.Sprintf("%sEvent: %s", indent, n.Name)
-	// case *ast.IfStatement:
-	// 	nodeStr = fmt.Sprintf("%sIf: %s", indent, n.GetText())
-	// case *ast.Catch:
-	// 	nodeStr = fmt.Sprintf("%sCatch: %s", indent, n.GetText())
-	// case *ast.FunctionCall:
-	// 	nodeStr = fmt.Sprintf("%sFunctionCall: %s", indent, n.GetText())
-	// case *ast.Assignment:
-	// 	nodeStr = fmt.Sprintf("%sAssignment: %s", indent, n.GetText())
-	// case *ast.EnumDefinition:
-	// 	nodeStr = fmt.Sprintf("%sEnum: %s", indent, n.Name)
-	// case *ast.ErrorDefinition:
-	// 	nodeStr = fmt.Sprintf("%sError: %s", indent, n.GetText())
-	// case *ast.Revert:
-	// 	nodeStr = fmt.Sprintf("%sRevert: %s", indent, n.GetText())
-	// case *ast.MemberAccess:
-	// 	nodeStr = fmt.Sprintf("%sMemberAccess: %s", indent, n.GetText())
-	// case *ast.Emit:
-	// 	nodeStr = fmt.Sprintf("%sEmit: %s", indent, n.GetText())
-	// case *ast.Tuple:
-	// 	nodeStr = fmt.Sprintf("%sTuple: %d elements", indent, len(n.Elements))
-	// case *ast.IndexAccess:
-	// 	nodeStr = fmt.Sprintf("%sIndexAccess: %s", indent, n.GetText())
-	// case *ast.For:
-	// 	nodeStr = fmt.Sprintf("%sFor: %s", indent, n.GetText())
-	default:
-		nodeStr = fmt.Sprintf("%sUnknown Node: %v", indent, n.GetType().Enum().String())
-	}
+	// case ast.NodeTypeStateVariableDeclaration:
+	// 	n := node.(*ast.StateVariableDeclaration)
+	// 	nodeStr = fmt.Sprintf("%sStateVariableDeclaration: %s", indent, n.Name)
+	// default:
+	// 	nodeStr = fmt.Sprintf("%sUnknown Node: %v", indent, node.GetType().String())
+	// }
 	println(nodeStr)
 	return nodeStr
 }
