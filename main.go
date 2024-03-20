@@ -89,11 +89,8 @@ func printNode(node ast.Node[ast.NodeType], depth int) string {
 	// 	nodeStr = fmt.Sprintf("%sComment: %s", indent, n.GetText())
 	case *ast.Pragma:
 		nodeStr = fmt.Sprintf("%sPragma: %s", indent, n.GetText())
-		println(n.GetTypeDescription())
 	case *ast.Import:
-		nodeStr = fmt.Sprintf("%sImport: %s", indent, n)
-		println(n.GetTypeDescription())
-
+		nodeStr = fmt.Sprintf("%sImport: %s", indent, n.GetName())
 	case *ast.ModifierDefinition:
 		nodeStr = fmt.Sprintf("%sModifier: %s", indent, n.Name)
 	// case *ast.SourceUnit:
@@ -102,6 +99,15 @@ func printNode(node ast.Node[ast.NodeType], depth int) string {
 		nodeStr = fmt.Sprintf("%sFunction: %s", indent, n.Name)
 	case *ast.Contract:
 		nodeStr = fmt.Sprintf("%sContract: %s", indent, n.Name)
+	case *ast.StructDefinition:
+		nodeStr = fmt.Sprintf("%sStruct: %s", indent, n.Name)
+	case *ast.VariableDeclaration:
+		// nodeStr = fmt.Sprintf("%sVariableDeclaration: %s", indent, n.Src)
+		println("Varaible DECL", n.Assignments)
+	case *ast.TypeName:
+		nodeStr = fmt.Sprintf("%sTypeName: %s", indent, n.Name)
+	case *ast.StateVariableDeclaration:
+		nodeStr = fmt.Sprintf("%sStateVariableDeclaration: %s", indent, n.Name)
 	// case *ast.Statement:
 	// 	nodeStr = fmt.Sprintf("%sStatement: %s", indent, n.GetText())
 	// case *ast.Body:
@@ -159,7 +165,7 @@ func printNode(node ast.Node[ast.NodeType], depth int) string {
 	// case *ast.For:
 	// 	nodeStr = fmt.Sprintf("%sFor: %s", indent, n.GetText())
 	default:
-		nodeStr = fmt.Sprintf("%sUnknown Node: %T", indent, n.GetType())
+		nodeStr = fmt.Sprintf("%sUnknown Node: %v", indent, n.GetType().Enum().String())
 	}
 	println(nodeStr)
 	return nodeStr
