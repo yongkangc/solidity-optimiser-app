@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"optimizer/optimizer/logger"
+	"optimizer/optimizer/optimizer"
 	"optimizer/optimizer/printer"
 	"os"
 	"os/user"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/0x19/solc-switch"
 	"github.com/unpackdev/solgo"
-	"github.com/unpackdev/solgo/ast"
 	"github.com/unpackdev/solgo/detector"
 	"go.uber.org/zap"
 )
@@ -24,7 +24,15 @@ func main() {
 
 	detector, _ := getDetector(ctx, "./examples/unoptimized_contracts/struct_packing.sol")
 
-	ast := getAST(detector)
+	zap.L().Info("Parsing and building contract")
+	if err := detector.Parse(); err != nil {
+		zap.L().Error("Failed to parse contract", zap.Errors("parse errors", err))
+	}
+	if err := detector.Build(); err != nil {
+		zap.L().Error("Failed to build contract", zap.Error(err))
+	}
+
+	ast := detector.GetAST()
 
 	// Create a new Printer
 	printer_new := printer.New()
@@ -34,14 +42,9 @@ func main() {
 	printer_new.Print(rootNode)
 	fmt.Println(printer_new.Output())
 
-}
-
-func getAST(detector *detector.Detector) *ast.ASTBuilder {
-	// Parse the contract
-	_ = detector.Parse()
-
-	tree := detector.GetAST()
-	return tree
+	// optimize the contract (still in progress)
+	opt := optimizer.NewOptimizer(detector.GetIR())
+	opt.Optimize()
 }
 
 // getDetector returns a detector instance for the given file path.
