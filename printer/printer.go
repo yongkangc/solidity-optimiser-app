@@ -96,6 +96,7 @@ func (p *Printer) visitNode(node ast.Node[ast.NodeType], depth int) {
 }
 
 func (p *Printer) VisitSourceUnit(sourceUnit *ast.SourceUnit[ast.Node[ast_pb.SourceUnit]], depth int) {
+	// Return because this would give us duplicate printing. however we could use this as well. 
 	return
 }
 
