@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 	"optimizer/optimizer/logger"
+	"optimizer/optimizer/printer"
 	"os"
 	"os/user"
 	"path/filepath"
-	"strings"
 
 	"github.com/0x19/solc-switch"
-	ast_pb "github.com/unpackdev/protos/dist/go/ast"
 	"github.com/unpackdev/solgo"
 	"github.com/unpackdev/solgo/ast"
 	"github.com/unpackdev/solgo/detector"
@@ -36,88 +35,16 @@ func main() {
 	// zap.S().Infof("Source Units: %v", string(jsonStruct))
 	// zap.S().Infof("AST: %v", ast.)
 
-	printCode(ast.GetRoot())
+	// Create a new Printer
+	printer_new := printer.New()
 
-	// // Traverse the AST and print the nodes with dfs
-	// for _, node := range tree.GetChildren() {
-	// 	zap.S().Infof("Node: %v", node.GetChildCount())
-	// }
+	rootNode := ast.GetRoot()
+	// Print the AST
+	printer_new.Print(rootNode)
+	fmt.Println(printer_new.Output())
 
-}
-
-// // printSourceCode prints the source code of the contract.
-// func printCode(root *ast.RootNode) {
-// 	// zap.S().Infof("Source Units: %v", len(root))
-// 	nodes := root.GetNodes()
-// 	println(len(nodes))
-// 	for _, node := range nodes {
-// 		zap.S().Infof("Node: %v", node)
-// 		for _, childNode := range node.GetNodes() {
-// 			zap.S().Infof("Child Node: %v", childNode)
-// 			for _, childChildNode := range childNode.GetNodes() {
-// 				zap.S().Infof("childChildNode: %v", childChildNode)
-// 				for _, childChildChildNode := range childChildNode.GetNodes() {
-// 					zap.S().Infof("childChildChildNode: %v", childChildChildNode)
-// 				}
-// 			}
-
-// 		}
-// 	}
-// }
-
-func printCode(root *ast.RootNode) {
-	nodes := root.GetNodes()
-	println(len(nodes))
-	traverseNodes(nodes, 0)
-}
-
-func traverseNodes(nodes []ast.Node[ast.NodeType], depth int) {
-	for _, node := range nodes {
-		printNode(node, depth)
-		childNodes := node.GetNodes()
-		if len(childNodes) > 0 {
-			traverseNodes(childNodes, depth+1)
-		}
-	}
-}
-
-func printNode(node ast.Node[ast.NodeType], depth int) string {
-	indent := strings.Repeat("  ", depth)
-	var nodeStr string
-
-	switch node.GetType() {
-	case ast_pb.NodeType_PRAGMA_DIRECTIVE:
-		n := node.(*ast.Pragma)
-		nodeStr = fmt.Sprintf("%sPragma: %s", indent, n.GetText())
-	// case ast.NodeTypeImport:
-	// 	n := node.(*ast.Import)
-	// 	nodeStr = fmt.Sprintf("%sImport: %s", indent, n.GetName())
-	// case ast.NodeTypeModifierDefinition:
-	// 	n := node.(*ast.ModifierDefinition)
-	// 	nodeStr = fmt.Sprintf("%sModifier: %s", indent, n.Name)
-	// case ast.NodeTypeFunction:
-	// 	n := node.(*ast.Function)
-	// 	nodeStr = fmt.Sprintf("%sFunction: %s", indent, n.Name)
-	// case ast.NodeTypeContract:
-	// 	n := node.(*ast.Contract)
-	// 	nodeStr = fmt.Sprintf("%sContract: %s", indent, n.Name)
-	// case ast.NodeTypeStructDefinition:
-	// 	n := node.(*ast.StructDefinition)
-	// 	nodeStr = fmt.Sprintf("%sStruct: %s", indent, n.Name)
-	// case ast.NodeTypeVariableDeclaration:
-	// 	n := node.(*ast.VariableDeclaration)
-	// 	nodeStr = fmt.Sprintf("%sVariableDeclaration: %s", indent, n.Src)
-	// case ast.NodeTypeTypeName:
-	// 	n := node.(*ast.TypeName)
-	// 	nodeStr = fmt.Sprintf("%sTypeName: %s", indent, n.Name)
-	// case ast.NodeTypeStateVariableDeclaration:
-	// 	n := node.(*ast.StateVariableDeclaration)
-	// 	nodeStr = fmt.Sprintf("%sStateVariableDeclaration: %s", indent, n.Name)
-	// default:
-	// 	nodeStr = fmt.Sprintf("%sUnknown Node: %v", indent, node.GetType().String())
-	// }
-	println(nodeStr)
-	return nodeStr
+	// Previous code
+	// printer.PrintCode(rootNode)
 }
 
 func getAST(detector *detector.Detector) *ast.ASTBuilder {
@@ -177,23 +104,4 @@ func getDetector(ctx context.Context, filePath string) (*detector.Detector, erro
 	}
 
 	return detector.NewDetectorFromSources(ctx, compiler, sources)
-}
-
-// Printer prints out the code based on the AST
-type Printer struct {
-	output string
-}
-
-func NewPrinter() *Printer {
-	return &Printer{
-		output: "",
-	}
-}
-
-// Print traverses the AST and prints the nodes
-func (p *Printer) Print(node ast.RootNode) {
-	// for _, child := range node() {
-	// 	p.Print(child)
-	// }
-
 }
