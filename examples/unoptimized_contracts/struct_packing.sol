@@ -9,6 +9,7 @@ contract NotOptimizedStruct {
         bool isActive;     // 1 byte
         address addr;      // 20 bytes
         uint16 department; // 2 bytes
+        uint16 epartment; // 2 bytes
     }
 }
 
