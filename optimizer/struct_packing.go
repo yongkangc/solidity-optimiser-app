@@ -44,11 +44,7 @@ func (o *Optimizer) binPacking(params []*ir.Parameter) []int {
 		smallParams = append(smallParams, pair{i, sizeOf(param.GetType())})
 	}
 
-	// sort the small parameters by size
-	sort.SliceStable(smallParams, func(i, j int) bool {
-		return smallParams[i].size > smallParams[j].size
-	})
-	res := bestFit(smallParams, 32)
+	res := bestFitDecreasing(smallParams, 32)
 	for i, bin := range res {
 		fmt.Printf("bin: %d\n", i)
 		for _, item := range bin.contents {
@@ -63,6 +59,14 @@ func (o *Optimizer) binPacking(params []*ir.Parameter) []int {
 type Slot struct {
 	freeSpace int
 	contents  []pair
+}
+
+func bestFitDecreasing(pairs []pair, slotSize int) []Slot {
+	// sort the pairs by size
+	sort.SliceStable(pairs, func(i, j int) bool {
+		return pairs[i].size > pairs[j].size
+	})
+	return bestFit(pairs, slotSize)
 }
 
 // https://stackoverflow.com/questions/15660476/bin-packing-exact-np-hard-exponential-algorithm
