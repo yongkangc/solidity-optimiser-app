@@ -64,6 +64,10 @@ type Slot struct {
 	contents  []pair
 }
 
+// Bin completion algorithm
+// gets the exact solution to the bin packing problem
+// ie. the optimal number of bins
+// https://cdn.aaai.org/AAAI/2002/AAAI02-110.pdf
 func binCompletion(pairs []pair, slotSize int) []Slot {
 	// first run best fit
 	slots := bestFitDecreasing(pairs, slotSize)
@@ -76,11 +80,14 @@ func binCompletion(pairs []pair, slotSize int) []Slot {
 		totalSize += item.size
 	}
 	var lowerBound int = int(math.Ceil(float64(totalSize) / float64(slotSize)))
+	fmt.Printf("lower bound: %d\n", lowerBound)
+	fmt.Printf("upper bound: %d\n", len(slots))
 	if len(slots) == lowerBound {
 		return slots
 	}
-	fmt.Printf("lower bound: %d\n", lowerBound)
-	fmt.Printf("upper bound: %d\n", len(slots))
+	// use branch and bound to find the exact solution
+	// prune branches when the number of bins >= upper bound
+
 	return nil
 }
 
