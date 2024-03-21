@@ -2,6 +2,7 @@ package optimizer
 
 import (
 	"fmt"
+	"math"
 	"sort"
 
 	"github.com/unpackdev/solgo/ir"
@@ -44,7 +45,8 @@ func (o *Optimizer) binPacking(params []*ir.Parameter) []int {
 		smallParams = append(smallParams, pair{i, sizeOf(param.GetType())})
 	}
 
-	res := bestFitDecreasing(smallParams, 32)
+	slotSize := 20
+	res := bestFitDecreasing(smallParams, slotSize)
 	for i, bin := range res {
 		fmt.Printf("bin: %d\n", i)
 		for _, item := range bin.contents {
@@ -52,6 +54,7 @@ func (o *Optimizer) binPacking(params []*ir.Parameter) []int {
 			fmt.Printf("  %d %d\n", item.idx, item.size)
 		}
 	}
+	fmt.Println(len(binCompletion(smallParams, slotSize)))
 
 	return result
 }
@@ -59,6 +62,26 @@ func (o *Optimizer) binPacking(params []*ir.Parameter) []int {
 type Slot struct {
 	freeSpace int
 	contents  []pair
+}
+
+func binCompletion(pairs []pair, slotSize int) []Slot {
+	// first run best fit
+	slots := bestFitDecreasing(pairs, slotSize)
+	// this gives us an upper bound on the number of bins
+	// first check if we have arrived at the optimal solution
+	// calculate lower bound
+	// if the lower bound is equal to the upper bound, then we have the optimal solution
+	totalSize := 0
+	for _, item := range pairs {
+		totalSize += item.size
+	}
+	var lowerBound int = int(math.Ceil(float64(totalSize) / float64(slotSize)))
+	if len(slots) == lowerBound {
+		return slots
+	}
+	fmt.Printf("lower bound: %d\n", lowerBound)
+	fmt.Printf("upper bound: %d\n", len(slots))
+	return nil
 }
 
 func bestFitDecreasing(pairs []pair, slotSize int) []Slot {
@@ -97,7 +120,7 @@ func bestFit(pairs []pair, slotSize int) []Slot {
 			slots[bestSlot].contents = append(slots[bestSlot].contents, item)
 			// else create a new slot
 		} else {
-			slots = append(slots, Slot{freeSpace: slotSize, contents: []pair{}})
+			slots = append(slots, Slot{freeSpace: slotSize, contents: []pair{item}})
 		}
 	}
 
