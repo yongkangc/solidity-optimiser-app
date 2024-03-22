@@ -2,22 +2,28 @@ package optimizer
 
 import (
 	"fmt"
+	"optimizer/optimizer/optimizer/binpack"
 
+	"github.com/unpackdev/solgo/ast"
 	"github.com/unpackdev/solgo/ir"
 )
 
+const SLOT_SIZE = 32
+
 type Optimizer struct {
 	builder *ir.Builder
+	ast     *ast.RootNode
 }
 
 func NewOptimizer(builder *ir.Builder) *Optimizer {
 	return &Optimizer{
 		builder: builder,
+		ast:     builder.GetRoot().GetAST(),
 	}
 }
 
 func (o *Optimizer) Optimize() {
-	// o.optimizeStructPacking()
+	o.optimizeStructPacking()
 }
 
 func (o *Optimizer) optimizeStructPacking() {
@@ -26,18 +32,27 @@ func (o *Optimizer) optimizeStructPacking() {
 		// iterate through the contract's structs
 		structs := contract.GetStructs()
 		for _, s := range structs {
-			o.printParams(s.GetMembers())
-			// TODO: sort the members by size
-			// deepcopy the members into another array
-			params := make([]*ir.Parameter, 0)
-			params = append(params, s.GetMembers()...)
-			// instead of sorting, we should group the members
-			// o.binPacking(params)
+			members := s.GetAST().GetMembers()
+			items := paramsToItems(members)
+			optimalSlots := binpack.OptimalBinPacking(items, SLOT_SIZE)
 
-			// TODO: re-arrange the members in the original struct
+			// re-arrange the members in the original struct
+			optimisedParams := make([]ast.Node[ast.NodeType], 0)
+			for _, slot := range optimalSlots {
+				for _, item := range slot {
+					optimisedParams = append(optimisedParams, members[item.Idx])
+				}
+			}
+
+			// update the struct with the optimised members
+			s.GetAST().Members = optimisedParams
+
 			// TODO: check where the struct is used and update the references
 		}
+		// update the contract with the optimised structs
 	}
+	// update the ast with the optimised contracts
+
 }
 
 func (o *Optimizer) printParams(params []*ir.Parameter) {
@@ -48,31 +63,24 @@ func (o *Optimizer) printParams(params []*ir.Parameter) {
 	}
 }
 
-// TODO: check if the struct is packed
-func (o *Optimizer) isPacked(s *ir.Struct) bool {
-
-	return false
-}
-
 func sizeOf(paramType string) int {
 	if size, ok := sizeMap[paramType]; ok {
 		return size
 	} else {
-		return 9999 // type not in map, set to huge number
+		return 32 // type not in map, set to 32 to be safe
 	}
 }
 
-// func deepCopySlotArray(src []Slot) []Slot {
-// 	// copy slots first
-// 	// copy the items in the slots
-// 	dst := make([]Slot, len(src))
-// 	copy(dst, src)
-// 	for i := range src {
-// 		dst[i].contents = make([]Pair, len(src[i].contents))
-// 		dst[i].freeSpace = src[i].freeSpace
-// 		for j := range src[i].contents {
-// 			dst[i].contents[j] = src[i].contents[j]
-// 		}
-// 	}
-// 	return dst
-// }
+func paramsToItems(p []*ast.Parameter) []binpack.Item {
+	items := make([]binpack.Item, len(p))
+	for i, param := range p {
+		param.GetType()
+		size := sizeOf(param.GetTypeName().GetName())
+		item := binpack.Item{
+			Idx:  i,
+			Size: size,
+		}
+		items[i] = item
+	}
+	return items
+}

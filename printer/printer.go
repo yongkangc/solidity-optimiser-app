@@ -96,7 +96,7 @@ func (p *Printer) visitNode(node ast.Node[ast.NodeType], depth int) {
 }
 
 func (p *Printer) VisitSourceUnit(sourceUnit *ast.SourceUnit[ast.Node[ast_pb.SourceUnit]], depth int) {
-	// Return because this would give us duplicate printing. however we could use this as well. 
+	// Return because this would give us duplicate printing. however we could use this as well.
 	return
 }
 
@@ -155,4 +155,3 @@ func (p *Printer) VisitVariableDeclaration(variable *ast.Parameter, depth int) {
 func (p *Printer) VisitTypeName(typeName *ast.TypeName, depth int) {
 	p.output += fmt.Sprintf("%sTypeName: %s\n", strings.Repeat("  ", depth), typeName.Name)
 }
-

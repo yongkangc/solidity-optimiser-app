@@ -43,8 +43,14 @@ func main() {
 	fmt.Println(printer_new.Output())
 
 	// optimize the contract (still in progress)
+	zap.L().Info("Optimizing contract")
 	opt := optimizer.NewOptimizer(detector.GetIR())
 	opt.Optimize()
+
+	// Print the optimized contract
+	printer_opt := printer.New()
+	printer_opt.Print(rootNode)
+	fmt.Println(printer_opt.Output())
 }
 
 // getDetector returns a detector instance for the given file path.
