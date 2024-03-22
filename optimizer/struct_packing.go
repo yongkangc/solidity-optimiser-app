@@ -12,13 +12,11 @@ const SLOT_SIZE = 32
 
 type Optimizer struct {
 	builder *ir.Builder
-	ast     *ast.RootNode
 }
 
 func NewOptimizer(builder *ir.Builder) *Optimizer {
 	return &Optimizer{
 		builder: builder,
-		ast:     builder.GetRoot().GetAST(),
 	}
 }
 
@@ -51,8 +49,6 @@ func (o *Optimizer) optimizeStructPacking() {
 		}
 		// update the contract with the optimised structs
 	}
-	// update the ast with the optimised contracts
-
 }
 
 func (o *Optimizer) printParams(params []*ir.Parameter) {
@@ -67,7 +63,7 @@ func sizeOf(paramType string) int {
 	if size, ok := sizeMap[paramType]; ok {
 		return size
 	} else {
-		return 32 // type not in map, set to 32 to be safe
+		return SLOT_SIZE // type not in map, set to 32 to be safe
 	}
 }
 
