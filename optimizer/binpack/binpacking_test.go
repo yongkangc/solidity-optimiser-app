@@ -7,31 +7,41 @@ import (
 	"testing"
 )
 
-func TestOptimalBinPackingHelper(t *testing.T, sizes []int, binCapacity int, expected [][]int) {
-	pairs := []binpack.Item{}
-	for i, size := range sizes {
-		pairs = append(pairs, binpack.Item{i, size})
+func slotsToSizes(slots []binpack.Slot) [][]int {
+	sizes := [][]int{}
+	for _, slot := range slots {
+		sizes = append(sizes, itemToSize(slot))
 	}
+	return sizes
+}
 
-	actual := binpack.OptimalBinPacking(pairs, binCapacity)
-	actualSizes := [][]int{}
-	for _, slot := range actual {
-		sizes := []int{}
-		for _, item := range slot {
-			sizes = append(sizes, item.Size)
-		}
+func itemToSize(items []binpack.Item) []int {
+	sizes := []int{}
+	for _, item := range items {
+		sizes = append(sizes, item.Size)
 	}
-
-	if !reflect.DeepEqual(actualSizes, expected) {
-		t.Errorf("expected %v, got %v\n", expected, actualSizes)
-	}
+	return sizes
 }
 
 func TestOptimalBinPacking(t *testing.T) {
-	t.Run("bin cap 10", func(t *testing.T) {
+	TestOptimalBinPackingHelper := func(t *testing.T, sizes []int, binCapacity int, expectedSizes [][]int) {
+		items := []binpack.Item{}
+		for i, size := range sizes {
+			items = append(items, binpack.Item{i, size})
+		}
+
+		actualSlots := binpack.OptimalBinPacking(items, binCapacity)
+		actualSizes := slotsToSizes(actualSlots)
+
+		if !reflect.DeepEqual(expectedSizes, actualSizes) {
+			t.Errorf("expected %v, got %v\n", expectedSizes, actualSizes)
+		}
+	}
+
+	t.Run("Bin capacity 10", func(t *testing.T) {
 		input := []int{9, 8, 2, 2, 5, 4}
 		binCapacity := 10
-		expected := [][]int{{9}, {8, 2}, {5, 4}}
+		expected := [][]int{{9}, {8, 2}, {5, 4}, {2}}
 		TestOptimalBinPackingHelper(t, input, binCapacity, expected)
 	})
 }
