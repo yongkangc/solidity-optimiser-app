@@ -90,6 +90,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/unpackdev/protos v0.3.2 h1:NlI4D6CNT7sbGcNV8Jprob5e8ltYYn2c+oMEd3pTs/0=
 github.com/unpackdev/protos v0.3.2/go.mod h1:nVBzYBlX6Gi/RE45sHciGM1NGF5s8LnTyCHYgm1eYV0=
+github.com/unpackdev/solgo v0.3.1 h1:wa+X245BIGBof4DMHSS565aSohII0n39kVDV30A2KEE=
+github.com/unpackdev/solgo v0.3.1/go.mod h1:b43922+Qed1A/L/Xp3Y9+9nTxQ9VMK6AstfIhIZyp+Q=
 github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b h1:wA3QeTsaAXybLL2kb2cKhCAQTHgYTMwuI8lBlJSv5V8=
 github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b/go.mod h1:xT1Y5p2JR2PfSZihE0s4mjdJaRGp1waCTf5JzhQLBck=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=

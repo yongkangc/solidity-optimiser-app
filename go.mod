@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/0x19/solc-switch v1.0.3
-	github.com/unpackdev/solgo v0.0.0-00010101000000-000000000000
+	github.com/unpackdev/solgo v0.3.1
 	go.uber.org/zap v1.27.0
 )
 
@@ -44,4 +44,5 @@ require (
 )
 
 // use this + go get if we make any changes to solgo
+// go get github.com/ExtremelySunnyYK/solgo@v0.0.0-20231223180605-162e6460afd8
 // replace github.com/unpackdev/solgo => github.com/ExtremelySunnyYK/solgo v0.0.0-20231223180605-162e6460afd8
