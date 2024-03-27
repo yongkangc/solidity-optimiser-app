@@ -1,6 +1,6 @@
 module optimizer/optimizer
 
-go 1.21.1
+go 1.21
 
 require (
 	github.com/0x19/solc-switch v1.0.3
