@@ -24,9 +24,9 @@ jobs:
       - name: Install Solidity compiler
         run: |
           mkdir -p ~/.solc/releases
-          wget -O solc.tar.gz https://github.com/ethereum/solidity/releases/download/v0.8.4/solc-static-linux
-          tar -xzf solc.tar.gz
-          mv solc ~/.solc/releases/solc-v0.8.4
+          wget -O solc-static-linux https://github.com/ethereum/solidity/releases/download/v0.8.4/solc-static-linux
+          chmod +x solc-static-linux
+          mv solc-static-linux ~/.solc/releases/solc-v0.8.4
           ln -s ~/.solc/releases/solc-v0.8.4 ~/.solc/solc
           ~/.solc/solc --version
 
