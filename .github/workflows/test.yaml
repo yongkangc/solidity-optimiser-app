@@ -1,0 +1,38 @@
+# .github/workflows/tests.yml
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    
+    steps:
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+      
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Get dependencies
+      run: go get -v -t -d ./...
+
+    - name: Run tests
+      run: go test -v ./...
+
+    - name: Run benchmarks
+      run: go test -bench=. -benchmem ./...
+
+    - name: Check test coverage
+      run: |
+        go test -coverprofile=coverage.out ./...
+        go tool cover -func=coverage.out
