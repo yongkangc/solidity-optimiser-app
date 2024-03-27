@@ -21,6 +21,15 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
+      - name: Install Solidity compiler
+        run: |
+          mkdir -p ~/.solc/releases
+          wget -O solc.tar.gz https://github.com/ethereum/solidity/releases/download/v0.8.4/solc-static-linux
+          tar -xzf solc.tar.gz
+          mv solc ~/.solc/releases/solc-v0.8.4
+          ln -s ~/.solc/releases/solc-v0.8.4 ~/.solc/solc
+          ~/.solc/solc --version
+
       - name: Get dependencies
         run: go get -v -t -d ./...
 
