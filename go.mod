@@ -43,5 +43,5 @@ require (
 	lukechampine.com/blake3 v1.2.1 // indirect
 )
 
-// use this + go get if we make any changes to 
+// use this + go get if we make any changes to solgo
 // replace github.com/unpackdev/solgo => github.com/ExtremelySunnyYK/solgo v0.0.0-20231223180605-162e6460afd8
