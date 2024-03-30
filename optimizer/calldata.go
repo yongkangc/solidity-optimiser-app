@@ -51,7 +51,6 @@ func (o *Optimizer) optimizeCallData() {
 						fmt.Println("Changed storage location to calldata for", param.GetName())
 					}
 				}
-				// TODO: Test for Struct and array
 			}
 		}
 	}
