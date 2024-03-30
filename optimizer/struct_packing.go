@@ -54,6 +54,7 @@ func sizeOf(paramType string) int {
 	}
 }
 
+// Converts the parameters to items for bin packing
 func paramsToItems(p []*ast.Parameter) []binpack.Item {
 	items := make([]binpack.Item, len(p))
 	for i, param := range p {

@@ -2,6 +2,8 @@
 package optimizer
 
 import (
+	"fmt"
+
 	ast_pb "github.com/unpackdev/protos/dist/go/ast"
 )
 
@@ -20,19 +22,21 @@ func (o *Optimizer) optimizeCallData() {
 		functions := contract.GetFunctions()
 		for _, f := range functions {
 			if f.GetVisibility() == ast_pb.Visibility_EXTERNAL {
-				parameters := f.GetParameters()
+				astParameters := f.GetAST().Parameters.Parameters
 
-				for _, param := range parameters {
-					paramType := param.Unit.GetTypeName().GetName()
+				for _, param := range astParameters {
+					paramType := param.GetTypeName().GetName()
+					fmt.Println(paramType)
 					// Check if the type is valid for storage
 					if _, ok := validTypes[paramType]; !ok {
 						continue
 					}
-					if param.Unit.StorageLocation == ast_pb.StorageLocation_MEMORY {
-						param.Unit.StorageLocation = ast_pb.StorageLocation_CALLDATA
+					if param.StorageLocation == ast_pb.StorageLocation_MEMORY {
+						param.StorageLocation = ast_pb.StorageLocation_CALLDATA
 					}
-					// TODO: check if this changes the AST
+					fmt.Println(param.StorageLocation)
 				}
+				// TODO: Test for Struct and array
 			}
 		}
 	}
