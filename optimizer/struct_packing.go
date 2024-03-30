@@ -1,3 +1,4 @@
+// Optimizes the contract to use call data instead of memory for external functions.
 package optimizer
 
 import (
@@ -9,20 +10,6 @@ import (
 )
 
 const SLOT_SIZE = 32
-
-type Optimizer struct {
-	builder *ir.Builder
-}
-
-func NewOptimizer(builder *ir.Builder) *Optimizer {
-	return &Optimizer{
-		builder: builder,
-	}
-}
-
-func (o *Optimizer) Optimize() {
-	o.optimizeStructPacking()
-}
 
 func (o *Optimizer) optimizeStructPacking() {
 	contracts := o.builder.GetRoot().GetContracts()
