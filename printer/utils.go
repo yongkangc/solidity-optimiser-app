@@ -2,7 +2,7 @@ package printer
 
 import (
 	"context"
-	"fmt"
+	"os"
 	"os/user"
 	"path/filepath"
 
@@ -16,7 +16,12 @@ import (
 
 func GetDetector(ctx context.Context, filePath string) (*detector.Detector, error) {
 
-	fmt.Println(filepath.Dir(filePath))
+	// Check if the file path exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		zap.L().Error("File does not exist", zap.Error(err))
+		return nil, err
+	}
+
 	sources := &solgo.Sources{
 		SourceUnits: []*solgo.SourceUnit{
 			{

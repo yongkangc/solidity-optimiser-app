@@ -84,8 +84,14 @@ func (p *Printer) visitNode(node ast.Node[ast.NodeType], depth int) {
 		n := node.(*ast.StructDefinition)
 		p.VisitStructDefinition(n, depth)
 	case ast_pb.NodeType_VARIABLE_DECLARATION:
-		n := node.(*ast.Parameter)
-		p.VisitVariableDeclaration(n, depth)
+		// check the interface type and cast it to the correct type
+		if n, ok := node.(*ast.Parameter); ok {
+			p.VisitVariableDeclaration(n, depth)
+		} else if _, ok := node.(*ast.StateVariableDeclaration); ok {
+			println("VariableDeclaration")
+		} else {
+			println("Unknown VariableDeclaration")
+		}
 	case ast_pb.NodeType_ELEMENTARY_TYPE_NAME:
 		n := node.(*ast.TypeName)
 		p.VisitTypeName(n, depth)
