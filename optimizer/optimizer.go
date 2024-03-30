@@ -13,5 +13,6 @@ func NewOptimizer(builder *ir.Builder) *Optimizer {
 }
 
 func (o *Optimizer) Optimize() {
-	o.optimizeStructPacking()
+	// o.optimizeStructPacking()
+	o.optimizeCallData()
 }

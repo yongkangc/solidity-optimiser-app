@@ -1,4 +1,4 @@
-// Optimizes the contract to use call data instead of memory for external functions.
+// Optimizes the contract struct using optimal bin packing
 package optimizer
 
 import (
