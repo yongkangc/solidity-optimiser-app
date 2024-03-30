@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"optimizer/optimizer/logger"
 	"optimizer/optimizer/optimizer"
 	"optimizer/optimizer/printer"
@@ -23,9 +22,7 @@ func main() {
 	}
 
 	// join the current working directory with the file path
-	filepath := cwd + "/examples/unoptimized_contracts/struct_packing.sol"
-
-	fmt.Println(filepath)
+	filepath := cwd + "/examples/unoptimized_contracts/calldata.sol"
 
 	detector, _ := printer.GetDetector(ctx, filepath)
 
@@ -37,23 +34,29 @@ func main() {
 		zap.L().Error("Failed to build contract", zap.Error(err))
 	}
 
-	ast := detector.GetAST()
+	// detector.GetAST()
 
 	// Create a new Printer
-	printer_new := printer.New()
+	// printer_new := printer.New()
 
-	rootNode := ast.GetRoot()
+	// rootNode := ast.GetRoot()
 	// Print the AST
-	printer_new.Print(rootNode)
-	fmt.Println(printer_new.Output())
+	// printer_new.Print(rootNode)
+	// fmt.Println(printer_new.Output())
 
 	// optimize the contract (still in progress)
 	zap.L().Info("Optimizing contract")
 	opt := optimizer.NewOptimizer(detector.GetIR())
 	opt.Optimize()
 
+	// bc, err := detector.GetAST().ToJSON()
+	// if err != nil {
+	// 	zap.L().Error("Failed to convert AST to JSON", zap.Error(err))
+	// }
+	// zap.L().Info("AST", zap.String("ast", string(bc)))
+
 	// Print the optimized contract
-	printer_opt := printer.New()
-	printer_opt.Print(rootNode)
-	fmt.Println(printer_opt.Output())
+	// printer_opt := printer.New()
+	// printer_opt.Print(rootNode)
+	// fmt.Println(printer_opt.Output())
 }
