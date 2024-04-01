@@ -8,22 +8,6 @@ import (
 	"github.com/unpackdev/solgo/ir"
 )
 
-const SLOT_SIZE = 32
-
-type Optimizer struct {
-	builder *ir.Builder
-}
-
-func NewOptimizer(builder *ir.Builder) *Optimizer {
-	return &Optimizer{
-		builder: builder,
-	}
-}
-
-func (o *Optimizer) Optimize() {
-	o.optimizeStructPacking()
-}
-
 func (o *Optimizer) optimizeStructPacking() {
 	contracts := o.builder.GetRoot().GetContracts()
 	for _, contract := range contracts {
