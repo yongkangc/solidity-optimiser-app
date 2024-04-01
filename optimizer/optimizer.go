@@ -1,6 +1,9 @@
 package optimizer
 
-import "github.com/unpackdev/solgo/ir"
+import (
+	"github.com/unpackdev/solgo/ir"
+	"go.uber.org/zap"
+)
 
 type Optimizer struct {
 	builder *ir.Builder
@@ -12,7 +15,12 @@ func NewOptimizer(builder *ir.Builder) *Optimizer {
 	}
 }
 
-func (o *Optimizer) Optimize() {
-	// o.optimizeStructPacking()
-	o.optimizeCallData()
+func (o *Optimizer) PackStructs() {
+	zap.L().Info("Packing structs")
+	o.optimizeStructPacking()
+}
+
+func (o *Optimizer) CacheStorageVariables() {
+	zap.L().Info("Caching storage variables")
+	o.optimizeStorageVariableCaching()
 }

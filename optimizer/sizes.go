@@ -1,5 +1,7 @@
 package optimizer
 
+const SLOT_SIZE = 32
+
 var sizeMap = map[string]int{
 	"int":     32,
 	"int8":    1,

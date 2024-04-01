@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"optimizer/optimizer/logger"
-	"optimizer/optimizer/optimizer"
 	"optimizer/optimizer/printer"
 	"os"
 
@@ -39,23 +38,19 @@ func main() {
 	// Create a new Printer
 	// printer_new := printer.New()
 
-	// rootNode := ast.GetRoot()
+	rootNode := ast.GetRoot()
+	fmt.Println(rootNode.ToSource())
 	// Print the AST
 	// printer_new.Print(rootNode)
 	// fmt.Println(printer_new.Output())
 
 	// optimize the contract (still in progress)
-	zap.L().Info("Optimizing contract")
-	opt := optimizer.NewOptimizer(detector.GetIR())
-	opt.Optimize()
-
-	// bc, err := detector.GetAST().ToJSON()
-	// if err != nil {
-	// 	zap.L().Error("Failed to convert AST to JSON", zap.Error(err))
-	// }
-	// zap.L().Info("AST", zap.String("ast", string(bc)))
-
-	// Print the optimized contract
+	// zap.L().Info("Optimizing contract")
+	// opt := optimizer.NewOptimizer(detector.GetIR())
+	// // opt.PackStructs()
+	// opt.CacheStorageVariables()
+	//
+	// // Print the optimized contract
 	// printer_opt := printer.New()
 	// printer_opt.Print(rootNode)
 	// fmt.Println(printer_opt.Output())
