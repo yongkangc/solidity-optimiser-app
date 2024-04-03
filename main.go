@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"optimizer/optimizer/logger"
+	"optimizer/optimizer/optimizer"
 	"optimizer/optimizer/printer"
 	"os"
 
@@ -33,21 +35,25 @@ func main() {
 		zap.L().Error("Failed to build contract", zap.Error(err))
 	}
 
-	// detector.GetAST()
+	ast := detector.GetAST()
 
 	// Create a new Printer
 	// printer_new := printer.New()
 
 	rootNode := ast.GetRoot()
+	zap.L().Info("=============================================")
 	fmt.Println(rootNode.ToSource())
 	// Print the AST
 	// printer_new.Print(rootNode)
 	// fmt.Println(printer_new.Output())
 
 	// optimize the contract (still in progress)
-	// zap.L().Info("Optimizing contract")
-	// opt := optimizer.NewOptimizer(detector.GetIR())
-	// // opt.PackStructs()
+	opt := optimizer.NewOptimizer(detector.GetIR())
+	opt.OptimizeCallData()
+
+	zap.L().Info("=============================================")
+	fmt.Println(rootNode.ToSource())
+	// opt.PackStructs()
 	// opt.CacheStorageVariables()
 	//
 	// // Print the optimized contract

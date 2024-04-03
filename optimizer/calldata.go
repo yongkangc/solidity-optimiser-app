@@ -3,8 +3,10 @@ package optimizer
 
 import (
 	"fmt"
+	"strings"
 
 	ast_pb "github.com/unpackdev/protos/dist/go/ast"
+	"github.com/unpackdev/solgo/ast"
 )
 
 // All possible variables that can have storage and memory in functions
@@ -32,7 +34,7 @@ const (
 	Visibility_EXTERNAL  Visibility = 4
 )
 
-func (o *Optimizer) optimizeCallData() {
+func (o *Optimizer) OptimizeCallData() {
 	contracts := o.builder.GetRoot().GetContracts()
 	for _, contract := range contracts {
 		functions := contract.GetFunctions()
@@ -42,10 +44,11 @@ func (o *Optimizer) optimizeCallData() {
 				astParameters := f.GetAST().Parameters.Parameters
 
 				for _, param := range astParameters {
-					paramType := param.GetTypeName().GetName()
-					if _, ok := validTypes[paramType]; !ok {
+					if !canBeConvertedToCallData(param) {
 						continue
 					}
+
+					// need to check if parameter is used in the function
 					if param.StorageLocation == ast_pb.StorageLocation_MEMORY {
 						param.StorageLocation = ast_pb.StorageLocation_CALLDATA
 						fmt.Println("Changed storage location to calldata for", param.GetName())
@@ -54,4 +57,19 @@ func (o *Optimizer) optimizeCallData() {
 			}
 		}
 	}
+}
+
+// https://docs.soliditylang.org/en/latest/types.html#reference-types
+func canBeConvertedToCallData(param *ast.Parameter) bool {
+	if param.StorageLocation == ast_pb.StorageLocation_MEMORY {
+		return true
+	}
+	paramType := param.GetTypeName().GetName()
+	isSlice := strings.Contains(paramType, "]")
+	isMapping := strings.Contains(paramType, "mapping")
+	// TODO: we dont handle structs for now
+	if isSlice || isMapping {
+		return true
+	}
+	return false
 }
