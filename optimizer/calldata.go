@@ -2,7 +2,6 @@
 package optimizer
 
 import (
-	"fmt"
 	"strings"
 
 	ast_pb "github.com/unpackdev/protos/dist/go/ast"
@@ -34,6 +33,7 @@ const (
 	Visibility_EXTERNAL  Visibility = 4
 )
 
+// if the function argument is only read, it can be converted to calldata
 func (o *Optimizer) OptimizeCallData() {
 	contracts := o.builder.GetRoot().GetContracts()
 	for _, contract := range contracts {
@@ -42,17 +42,11 @@ func (o *Optimizer) OptimizeCallData() {
 			modifier := f.GetStateMutability()
 			if modifier == ast_pb.Mutability_PURE || modifier == ast_pb.Mutability_VIEW {
 				astParameters := f.GetAST().Parameters.Parameters
-
 				for _, param := range astParameters {
 					if !canBeConvertedToCallData(param) {
 						continue
 					}
-
-					// need to check if parameter is used in the function
-					if param.StorageLocation == ast_pb.StorageLocation_MEMORY {
-						param.StorageLocation = ast_pb.StorageLocation_CALLDATA
-						fmt.Println("Changed storage location to calldata for", param.GetName())
-					}
+					param.StorageLocation = ast_pb.StorageLocation_CALLDATA
 				}
 			}
 		}
@@ -61,8 +55,8 @@ func (o *Optimizer) OptimizeCallData() {
 
 // https://docs.soliditylang.org/en/latest/types.html#reference-types
 func canBeConvertedToCallData(param *ast.Parameter) bool {
-	if param.StorageLocation == ast_pb.StorageLocation_MEMORY {
-		return true
+	if param.StorageLocation != ast_pb.StorageLocation_MEMORY {
+		return false
 	}
 	paramType := param.GetTypeName().GetName()
 	isSlice := strings.Contains(paramType, "]")
@@ -72,4 +66,10 @@ func canBeConvertedToCallData(param *ast.Parameter) bool {
 		return true
 	}
 	return false
+}
+
+// TODO: Check if the parameter is modified in the function
+// might have to do a dfs here to check if the parameter is modified
+func isParamModified(param *ast.Parameter) bool {
+	return true
 }
