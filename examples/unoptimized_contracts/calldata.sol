@@ -22,4 +22,13 @@ contract ArraySumCalculator {
         }
         return sum;
     }
+
+    function shouldntOptimiseThis(uint256[] memory numbers) external pure returns (uint256) {
+        uint256 sum = 0;
+        for (uint256 i = 0; i < numbers.length; ++i) {
+            sum += numbers[i];
+            numbers[i] = 0;
+        }
+        return sum;
+    }
 }
