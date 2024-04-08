@@ -1,3 +1,4 @@
+// Optimizes the contract struct using optimal bin packing
 package optimizer
 
 import (
@@ -7,22 +8,6 @@ import (
 	"github.com/unpackdev/solgo/ast"
 	"github.com/unpackdev/solgo/ir"
 )
-
-const SLOT_SIZE = 32
-
-type Optimizer struct {
-	builder *ir.Builder
-}
-
-func NewOptimizer(builder *ir.Builder) *Optimizer {
-	return &Optimizer{
-		builder: builder,
-	}
-}
-
-func (o *Optimizer) Optimize() {
-	o.optimizeStructPacking()
-}
 
 func (o *Optimizer) optimizeStructPacking() {
 	contracts := o.builder.GetRoot().GetContracts()
@@ -67,6 +52,7 @@ func sizeOf(paramType string) int {
 	}
 }
 
+// Converts the parameters to items for bin packing
 func paramsToItems(p []*ast.Parameter) []binpack.Item {
 	items := make([]binpack.Item, len(p))
 	for i, param := range p {

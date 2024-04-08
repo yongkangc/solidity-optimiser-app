@@ -23,9 +23,8 @@ func main() {
 	}
 
 	// join the current working directory with the file path
-	filepath := cwd + "/examples/unoptimized_contracts/struct_packing.sol"
-
-	fmt.Println(filepath)
+	// filepath := cwd + "/examples/unoptimized_contracts/struct_packing.sol"
+	filepath := cwd + "/examples/unoptimized_contracts/calldata.sol"
 
 	detector, _ := printer.GetDetector(ctx, filepath)
 
@@ -38,22 +37,32 @@ func main() {
 	}
 
 	ast := detector.GetAST()
+	errs := ast.ResolveReferences()
+	if len(errs) > 0 {
+		zap.L().Error("Failed to resolve references", zap.Errors("resolve errors", errs))
+	}
 
 	// Create a new Printer
-	printer_new := printer.New()
+	// printer_new := printer.New()
 
 	rootNode := ast.GetRoot()
+	zap.L().Info("=============================================")
+	fmt.Println(rootNode.ToSource())
 	// Print the AST
-	printer_new.Print(rootNode)
-	fmt.Println(printer_new.Output())
+	// printer_new.Print(rootNode)
+	// fmt.Println(printer_new.Output())
 
 	// optimize the contract (still in progress)
-	zap.L().Info("Optimizing contract")
 	opt := optimizer.NewOptimizer(detector.GetIR())
-	opt.Optimize()
+	opt.OptimizeCallData()
 
-	// Print the optimized contract
-	printer_opt := printer.New()
-	printer_opt.Print(rootNode)
-	fmt.Println(printer_opt.Output())
+	zap.L().Info("=============================================")
+	fmt.Println(rootNode.ToSource())
+	// opt.PackStructs()
+	// opt.CacheStorageVariables()
+	//
+	// // Print the optimized contract
+	// printer_opt := printer.New()
+	// printer_opt.Print(rootNode)
+	// fmt.Println(printer_opt.Output())
 }
