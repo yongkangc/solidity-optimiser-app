@@ -34,18 +34,33 @@ const (
 )
 
 // if the function argument is only read, it can be converted to calldata
+// reference: https://ethereum.stackexchange.com/questions/19380/external-vs-public-best-practices
 func (o *Optimizer) OptimizeCallData() {
+	nodeVisitor := initVisitor()
 	contracts := o.builder.GetRoot().GetContracts()
 	for _, contract := range contracts {
 		functions := contract.GetFunctions()
 		for _, f := range functions {
+			candidates := make([]*ast.Parameter, 0)
+			astParameters := f.GetAST().Parameters.Parameters
+			for _, param := range astParameters {
+				if canBeConvertedToCallData(param) {
+					candidates = append(candidates, param)
+				}
+			}
+
 			modifier := f.GetStateMutability()
 			if modifier == ast_pb.Mutability_PURE || modifier == ast_pb.Mutability_VIEW {
-				astParameters := f.GetAST().Parameters.Parameters
-				for _, param := range astParameters {
-					if !canBeConvertedToCallData(param) {
-						continue
-					}
+				for _, param := range candidates {
+					param.StorageLocation = ast_pb.StorageLocation_CALLDATA
+				}
+				continue
+			}
+
+			// check if param is being used in the function
+			f.GetAST().GetTree().WalkNode(f.GetAST(), nodeVisitor.visitor)
+			for _, param := range candidates {
+				if _, found := nodeVisitor.modifiedParams[param.GetName()]; !found {
 					param.StorageLocation = ast_pb.StorageLocation_CALLDATA
 				}
 			}
@@ -68,8 +83,33 @@ func canBeConvertedToCallData(param *ast.Parameter) bool {
 	return false
 }
 
+type CallDataVisitor struct {
+	modifiedParams map[string]bool
+	visitor        *ast.NodeVisitor
+}
+
 // TODO: Check if the parameter is modified in the function
 // might have to do a dfs here to check if the parameter is modified
-func isParamModified(param *ast.Parameter) bool {
-	return true
+func initVisitor() *CallDataVisitor {
+	callDataVisitor := &CallDataVisitor{
+		modifiedParams: make(map[string]bool, 0),
+		visitor:        &ast.NodeVisitor{},
+	}
+	callDataVisitor.visitor.RegisterTypeVisit(ast_pb.NodeType_ASSIGNMENT, func(node ast.Node[ast.NodeType]) (bool, error) {
+		assignment, _ := node.(*ast.Assignment)
+		if le := assignment.GetLeftExpression(); le != nil {
+			assignment.GetTree().ExecuteCustomTypeVisit(assignment.GetNodes(), ast_pb.NodeType_IDENTIFIER, func(node ast.Node[ast.NodeType]) (bool, error) {
+				name := node.(*ast.PrimaryExpression).GetName()
+				callDataVisitor.modifiedParams[name] = true
+				return true, nil
+			})
+		}
+		// check left hand side
+		return true, nil
+	})
+	return callDataVisitor
+}
+
+func isParamModified(param *ast.Parameter, f *ast.Function) bool {
+	return false
 }
