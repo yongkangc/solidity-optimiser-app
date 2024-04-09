@@ -7,6 +7,7 @@ import (
 	"github.com/unpackdev/solgo/ast"
 )
 
+// caches storage variables in local variables
 func (o *Optimizer) optimizeStorageVariableCaching() {
 	// TODO: check if the storage variable is read more than once
 	//       if it is, cache it in a local variable
@@ -15,20 +16,11 @@ func (o *Optimizer) optimizeStorageVariableCaching() {
 		// iterate through the contract's functions
 		functions := contract.GetFunctions()
 		for _, f := range functions {
-			// iterate through the function's statements
-			// f.GetAST().GetTree().Walk(&ast.NodeVisitor{
-			// 	Visit: func(node ast.Node[ast.NodeType]) bool {
-			// 		if pri, ok := node.(*ast.PrimaryExpression); ok {
-			// 			if node.GetType() == ast_pb.NodeType_IDENTIFIER {
-			// 				fmt.Println("referenced declaration: ", pri.GetReferencedDeclaration())
-			//
-			// 				// fmt.Println("source: ", o.builder.GetAstBuilder().GetTree().GetById(pri.GetReferencedDeclaration()).ToSource())
-			// 			}
-			// 		}
-			// 		fmt.Println(node.GetSrc().Line, node.GetId(), node.GetType(), node.ToSource())
-			// 		return true
-			// 	},
-			// })
+			modifier := f.GetStateMutability()
+			// TODO: we can check if the function modifies the state, but that is another feature
+			if modifier != ast_pb.Mutability_VIEW {
+				continue
+			}
 			stateVariables := make(map[int64]*ast.StateVariableDeclaration, 0)
 			referencesToStateVariables := make(map[int64][]*ast.PrimaryExpression, 0)
 			tree := f.GetAST().GetTree()
@@ -67,12 +59,13 @@ func (o *Optimizer) optimizeStorageVariableCaching() {
 			})
 
 			for _, sv := range stateVariables {
+				if !isSupportedType(sv.GetTypeName()) {
+					continue
+				}
 				// HACK: doing this screws up the numbering of the nodes
 				InsertCachedVariable(f.GetBody().Unit, sv)
-				fmt.Println("Caching state variable: ", sv.ToSource())
 				for _, ident := range referencesToStateVariables[sv.GetId()] {
 					ident.Name = fmt.Sprintf("cached_%s", sv.GetName())
-					fmt.Println("Cached reference: ", ident.GetId(), ident.ToSource())
 				}
 			}
 		}
@@ -99,5 +92,15 @@ func InsertCachedVariable(body *ast.BodyNode, sv *ast.StateVariableDeclaration) 
 			TypeName:              sv.GetTypeName(),
 		},
 	}
+	// put the new variable declaration at the beginning of the function body
 	body.Statements = append([]ast.Node[ast.NodeType]{cachedVarDeclaration}, body.Statements...)
+}
+
+// isSupportedType checks if the type is supported for caching
+func isSupportedType(t *ast.TypeName) bool {
+	name := t.GetName()
+	if _, ok := sizeMap[name]; ok {
+		return true
+	}
+	return false
 }
