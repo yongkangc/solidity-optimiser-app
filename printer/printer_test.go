@@ -30,20 +30,20 @@ func setupSampleStructAST(t *testing.T) *ast.RootNode {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	detector, err := printer.GetDetector(ctx, solidityFilePath)
+	builder, err := printer.GetBuilder(ctx, solidityFilePath)
 	if err != nil {
-		t.Fatalf("Failed to get detector: %v", err)
+		t.Fatalf("Failed to get builder: %v", err)
 	}
 
-	if err := detector.Parse(); err != nil {
+	if err := builder.Parse(); err != nil {
 		t.Fatalf("Failed to parse contract: %v", err)
 	}
 
-	if err := detector.Build(); err != nil {
+	if err := builder.Build(); err != nil {
 		t.Fatalf("Failed to build contract: %v", err)
 	}
 
-	ast := detector.GetAST()
+	ast := builder.GetAstBuilder()
 	return ast.GetRoot()
 }
 
