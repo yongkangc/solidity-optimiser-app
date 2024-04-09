@@ -24,7 +24,8 @@ func main() {
 
 	// join the current working directory with the file path
 	// filepath := cwd + "/examples/unoptimized_contracts/struct_packing.sol"
-	filepath := cwd + "/examples/unoptimized_contracts/calldata.sol"
+	// filepath := cwd + "/examples/unoptimized_contracts/calldata.sol"
+	filepath := cwd + "/examples/unoptimized_contracts/storage_variable_caching.sol"
 
 	detector, _ := printer.GetDetector(ctx, filepath)
 
@@ -54,7 +55,8 @@ func main() {
 
 	// optimize the contract (still in progress)
 	opt := optimizer.NewOptimizer(detector.GetIR())
-	opt.OptimizeCallData()
+	// opt.OptimizeCallData()
+	opt.CacheStorageVariables()
 
 	zap.L().Info("=============================================")
 	fmt.Println(rootNode.ToSource())
