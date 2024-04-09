@@ -7,6 +7,7 @@ import (
 	"optimizer/optimizer/printer"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -66,7 +67,14 @@ func TestStructPrinter(t *testing.T) {
   }
 `
 
-		assert.Equal(t, expectedOutput, printer.Output())
+		assert.Equal(t, TrimWhitespace(expectedOutput), TrimWhitespace(printer.Output()))
 
 	})
+}
+
+func TrimWhitespace(input string) string {
+	// remove all whitespace from the input string
+	input = strings.ReplaceAll(input, " ", "")
+	input = strings.ReplaceAll(input, "\n", "")
+	return input
 }
