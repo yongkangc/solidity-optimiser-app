@@ -6,6 +6,7 @@ import (
 
 	ast_pb "github.com/unpackdev/protos/dist/go/ast"
 	"github.com/unpackdev/solgo/ast"
+	"go.uber.org/zap"
 )
 
 // All possible variables that can have storage and memory in functions
@@ -36,6 +37,7 @@ const (
 // if the function argument is only read, it can be converted to calldata
 // reference: https://ethereum.stackexchange.com/questions/19380/external-vs-public-best-practices
 func (o *Optimizer) OptimizeCallData() {
+	zap.L().Info("Optimizing call data")
 	nodeVisitor := initVisitor()
 	contracts := o.builder.GetRoot().GetContracts()
 	for _, contract := range contracts {
