@@ -49,7 +49,8 @@ export default function Home() {
       }
     } catch (error: any) {
       console.error("Error:", error);
-      setError("An unexpected error occurred.");
+      const errorMessage = error.message || "An unexpected error occurred.";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

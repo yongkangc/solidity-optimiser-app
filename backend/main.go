@@ -45,7 +45,7 @@ func optimizeHandler(c *gin.Context) {
 
 	var input struct {
 		ContractCode string             `json:"contractCode"`
-		Opts         OptimizationConfig `json:"opts"`
+		Options      OptimizationConfig `json:"opts"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -86,7 +86,7 @@ func optimizeHandler(c *gin.Context) {
 
 	// Optimize the contract
 	opt := optimizer.NewOptimizer(detector.GetIR())
-	optimizeContract(opt)
+	optimizeContract(opt, input.Options)
 
 	printer_opt := printer.New()
 	printer_opt.Print(rootNode)
