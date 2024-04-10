@@ -1,7 +1,9 @@
 # Solidity-Gas-Optimizoor
 
-![Alt text](project_image.png)
+![Alt text](demo.png)
+
 An high performance automated tool that optimizes gas usage in Solidity smart contracts, focusing on storage and function call efficiency.
+
 For more information on architecture and implementation, see the [docs](docs.md)
 
 **Disclaimer:**
@@ -38,20 +40,6 @@ The goal of this project is to design and implement a CLI and Web app that analy
 - **Reference**: [Calldata Efficiency Tips](https://github.com/beskay/gas-guide/blob/main/OPTIMIZATIONS.md#calldata-instead-of-memory-for-external-functions)
 
 ---
-
-## Delivables of the project
-
-### Core Deliverables:
-
-- A **Rust-based CLI tool** that can be run on various operating systems.
-- **Source code analysis** and **optimization algorithms** that:
-  - Apply tight variable packing and efficient data type usage.
-  - **Struct packing optimization** feature that reorders struct fields to use storage slots efficiently.
-  - **Function selector optimization** that reorders function definitions based on call frequency to save gas.
-- **Automated code rewriting** capabilities that apply the suggested optimizations directly to the Solidity source code.
-- **Documentation** on how to install, configure, and use the tool.
-- **Test suite** that covers various Solidity contracts and ensures the reliability of the optimization process.
-- **Benchmarking reports** that demonstrate the gas savings achieved by the tool on sample contracts.
 
 ## Setup
 
