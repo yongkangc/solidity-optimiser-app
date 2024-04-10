@@ -1,7 +1,7 @@
 # Solidity-Gas-Optimizoor
 
+![Alt text](project_image.png)
 An high performance automated tool that optimizes gas usage in Solidity smart contracts, focusing on storage and function call efficiency.
-![Alt text](project_img.png)
 For more information on architecture and implementation, see the [docs](docs.md)
 
 **Disclaimer:**
@@ -22,6 +22,8 @@ The goal of this project is to design and implement a CLI and Web app that analy
 - **Concept**: Aligning struct members under 32 bytes together optimizes storage usage on the EVM.
 - **Advantages**: This technique minimizes the number of `SLOAD` or `SSTORE` operations, slashing storage interaction costs by 50% or more when dealing with multiple struct values within a single slot.
 - **Documentation**: [Structured Data Packing Guidance](https://github.com/beskay/gas-guide/blob/main/OPTIMIZATIONS.md#storage-packing)
+
+[Demo](https://www.youtube.com/watch?v=cm8SGd2WK24&ab_channel=YongKangChia)
 
 ### Caching Storage Variables
 
