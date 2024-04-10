@@ -2,7 +2,6 @@
 
 An high performance automated tool that optimizes gas usage in Solidity smart contracts, focusing on storage and function call efficiency.
 ![Alt text](project_img.png)
-
 For more information on architecture and implementation, see the [docs](docs.md)
 
 **Disclaimer:**
