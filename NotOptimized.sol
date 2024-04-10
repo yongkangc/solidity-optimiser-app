@@ -2,12 +2,14 @@
 pragma solidity ^0.8.0;
 
 contract NotOptimizedStruct {
-    struct Employee {
-        uint256 id;        // 32 bytes
-        uint32 salary;     // 4 bytes
-        uint32 age;        // 4 bytes
-        bool isActive;     // 1 byte
-        address addr;      // 20 bytes
-        uint16 department; // 2 bytes
+    struct Product {
+        uint256 id;         // 32 bytes
+        bool isAvailable;   // 1 byte
+        uint256 price;      // 32 bytes
+        uint32 quantity;    // 4 bytes
+        string name;        // dynamic size
+        uint32 category;    // 4 bytes
+        address seller;     // 20 bytes
+        uint16 ratings;     // 2 bytes
     }
 }

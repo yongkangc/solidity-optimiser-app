@@ -8,6 +8,12 @@ download dependencies: `go mod download`
 
 update submodules: `make update-submodules`
 
+### Web
+
+1. Install npm dependencies: `npm install`
+2. Install tmux with `sudo apt install tmux` or `brew install tmux`
+3. Start the backend and frontend with `make start`
+
 ### Solc
 
 To get Solidity compiler releases and ensure that the `{HOME}/.solc/releases` directory exists, you can follow these steps:
