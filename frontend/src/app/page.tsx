@@ -9,10 +9,12 @@ export default function Home() {
   const [inputCode, setInputCode] = useState("");
   const [optimizedCode, setOptimizedCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     try {
       const response = await fetch("/api/optimize", {
@@ -20,77 +22,102 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ code: inputCode }),
+        body: JSON.stringify({ contractCode: inputCode }),
       });
 
       if (response.ok) {
-        const { optimizedCode } = await response.json();
-        setOptimizedCode(optimizedCode);
+        const data = await response.json();
+        setOptimizedCode(data.optimizedCode);
       } else {
-        console.error("Optimization failed");
+        const errorData = await response.json();
+        setError(errorData.error);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
+      const errorMessage = error.message || "An unexpected error occurred.";
+      setError(errorMessage);
     }
 
     setIsLoading(false);
   };
 
+  const closeAlert = () => {
+    setError("");
+  };
+
   return (
-    <div className="container mx-auto p-4">
+    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
       <Head>
         <title>Solidity Code Optimizer</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <h1 className="text-3xl font-bold mb-4">Solidity Code Optimizer</h1>
+      <div className="max-w-4xl w-full bg-gray-800 p-8 rounded shadow-md">
+        <h1 className="text-3xl font-bold mb-8 text-center">
+          Solidity Code Optimizer
+        </h1>
 
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="inputCode" className="block mb-2">
-            Enter Solidity Code:
-          </label>
-          <textarea
-            id="inputCode"
-            className="w-full h-40 p-2 border border-gray-300 rounded text-black"
-            value={inputCode}
-            onChange={(e) => setInputCode(e.target.value)}
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          disabled={isLoading}
-        >
-          {isLoading ? "Optimizing..." : "Optimize Code"}
-        </button>
-      </form>
+        {error && (
+          <div className="bg-red-500 text-white px-4 py-2 mb-4 rounded flex items-center justify-between">
+            <span>{error}</span>
+            <button
+              className="text-white hover:text-gray-200 ml-4"
+              onClick={closeAlert}
+            >
+              &times;
+            </button>
+          </div>
+        )}
 
-      {optimizedCode && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4 text-black">
-            Optimized Code:
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="text-xl font-bold mb-2 text-black">
-                Original Code
-              </h3>
-              <SyntaxHighlighter language="solidity" style={atomDark}>
-                {inputCode}
-              </SyntaxHighlighter>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold mb-2 text-black">
-                Optimized Code
-              </h3>
-              <SyntaxHighlighter language="solidity" style={atomDark}>
-                {optimizedCode}
-              </SyntaxHighlighter>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-8">
+            <label htmlFor="inputCode" className="block mb-2 font-bold">
+              Enter Solidity Code:
+            </label>
+            <textarea
+              id="inputCode"
+              className="w-full h-64 p-4 bg-gray-700 text-white border border-gray-600 rounded"
+              value={inputCode}
+              onChange={(e) => setInputCode(e.target.value)}
+            />
+          </div>
+          <div className="text-center">
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-6 py-3 rounded font-bold text-lg"
+              disabled={isLoading}
+            >
+              {isLoading ? "Optimizing..." : "Optimize Code"}
+            </button>
+          </div>
+        </form>
+
+        {optimizedCode && (
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-6 text-center">
+              Optimized Code
+            </h2>
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-xl font-bold mb-4 text-center">
+                  Original Code
+                </h3>
+                <SyntaxHighlighter language="solidity" style={atomDark}>
+                  {inputCode}
+                </SyntaxHighlighter>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-4 text-center">
+                  Optimized Code
+                </h3>
+                <SyntaxHighlighter language="solidity" style={atomDark}>
+                  {optimizedCode}
+                </SyntaxHighlighter>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

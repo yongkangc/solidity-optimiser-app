@@ -7,6 +7,7 @@ import (
 	"optimizer/optimizer/optimizer"
 	"optimizer/optimizer/printer"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/unpackdev/solgo/ast"
 	"go.uber.org/zap"
@@ -16,13 +17,21 @@ func main() {
 	logger.Setup()
 
 	r := gin.Default()
+	// Enable CORS
+	r.Use(cors.Default())
 
+	r.GET("/health", healthHandler)
 	r.POST("/optimize", optimizeHandler)
 
 	r.Run(":8080")
 }
 
+func healthHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
 func optimizeHandler(c *gin.Context) {
+	zap.L().Info("Optimize handler")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -34,7 +43,7 @@ func optimizeHandler(c *gin.Context) {
 		return
 	}
 
-	detector, err := printer.GetDetector(ctx, input.ContractCode)
+	detector, err := printer.GetDetectorCode(ctx, input.ContractCode)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

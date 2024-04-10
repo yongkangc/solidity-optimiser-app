@@ -12,3 +12,9 @@ run-frontend:
 
 run-backend:
 	tmux new-session -d -s backend "cd backend && go run main.go"
+
+view-backend:
+	tmux attach-session -t backend
+
+view-frontend:
+	tmux attach-session -t frontend
