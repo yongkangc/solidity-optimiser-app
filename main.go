@@ -14,6 +14,10 @@ import (
 )
 
 func main() {
+	optimize()
+}
+
+func optimize() {
 	logger.Setup()
 
 	ctx, cancel := context.WithCancel(context.Background())

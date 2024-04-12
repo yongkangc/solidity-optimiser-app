@@ -4,39 +4,79 @@
 
 input
 
-```solidity
-    struct RequestMeta {
-        uint64 completedRequests;
-        Custom.Datatype data;
-        address requestingContract;
-        uint72 adminFee; // in wei
-        address subscriptionOwner;
-        bytes32 flags; // 32 bytes of flags
-        uint96 availableBalance; // in wei. 0 if not specified.
-        uint64 subscriptionId;
-        uint64 initiatedRequests;// number of requests initiated by this contract
-        uint32 callbackGasLimit;
-        uint16 dataVersion;
-    }
-```
+# Struct Packing Optimization in Solidity
 
-Expected output
+When working with structs in Solidity, it's important to consider the storage layout and optimize the struct fields to minimize wasted space and reduce gas costs. In this writeup, we'll explore an example that demonstrates struct packing optimization.
+
+## Unoptimized Struct
+
+Let's start with an unoptimized struct:
 
 ```solidity
-    struct RequestMeta {
-        Custom.Datatype data; //
-        bytes32 flags; //                  32 bytes of flags
-        address requestingContract; // ──╮
-        uint96 availableBalance; // ─────╯ in wei. 0 if not specified.
-        address subscriptionOwner; // ───╮
-        uint64 completedRequests; //     │
-        uint32 callbackGasLimit; // ─────╯
-        uint72 adminFee; // ─────────────╮ in wei
-        uint64 subscriptionId; //        │
-        uint64 initiatedRequests; //     │ number of requests initiated by this contract
-        uint16 dataVersion; // ──────────╯
+contract NotOptimizedStruct {
+    struct Product {
+        uint256 id;         // 32 bytes
+        bool isAvailable;   // 1 byte
+        uint256 price;      // 32 bytes
+        uint32 quantity;    // 4 bytes
+        string name;        // dynamic size
+        uint32 category;    // 4 bytes
+        address seller;     // 20 bytes
+        uint16 ratings;     // 2 bytes
     }
+}
 ```
+
+In the `NotOptimizedStruct` contract, the `Product` struct is not optimized for storage. The variables are not arranged in a way that minimizes gaps caused by Solidity's storage layout. Let's analyze the storage layout of the unoptimized struct:
+
+- `uint256 id` occupies 32 bytes (1 slot)
+- `bool isAvailable` occupies 1 byte, wasting 31 bytes in the slot
+- `uint256 price` occupies 32 bytes (1 slot)
+- `uint32 quantity` occupies 4 bytes, wasting 28 bytes in the slot
+- `string name` is a dynamic size variable and is stored separately
+- `uint32 category` occupies 4 bytes, wasting 28 bytes in the slot
+- `address seller` occupies 20 bytes, wasting 12 bytes in the slot
+- `uint16 ratings` occupies 2 bytes, wasting 30 bytes in the slot
+
+In total, the unoptimized struct wastes a significant amount of storage space.
+
+## Optimized Struct
+
+Now, let's optimize the struct for better storage efficiency:
+
+```solidity
+contract OptimizedStruct {
+    struct Product {
+        uint256 id;         // 32 bytes
+        uint256 price;      // 32 bytes
+        address seller;     // 20 bytes
+        string name;        // dynamic size
+        uint32 quantity;    // 4 bytes
+        uint32 category;    // 4 bytes
+        uint16 ratings;     // 2 bytes
+        bool isAvailable;   // 1 byte
+    }
+}
+```
+
+In the `OptimizedStruct` contract, the `Product` struct is arranged in a way that minimizes wasted space:
+
+- `uint256 id` occupies 32 bytes (1 slot)
+- `uint256 price` occupies 32 bytes (1 slot)
+- `address seller` occupies 20 bytes, leaving 12 bytes for other variables
+- `string name` is a dynamic size variable and is stored separately
+- `uint32 quantity` occupies 4 bytes, packed with `category` and `ratings`
+- `uint32 category` occupies 4 bytes, packed with `quantity` and `ratings`
+- `uint16 ratings` occupies 2 bytes, packed with `quantity` and `category`
+- `bool isAvailable` occupies 1 byte, utilizing the remaining byte in the slot
+
+The optimized struct arranges the variables in a way that minimizes wasted space. The `uint256` variables are placed first since they occupy full slots. The `address` variable is placed next, leaving space for smaller variables to be packed together. The `uint32`, `uint16`, and `bool` variables are packed together in the remaining slots, utilizing the available space efficiently.
+
+## Conclusion
+
+By optimizing the struct layout, we can reduce the storage costs and improve gas efficiency when working with instances of the `Product` struct. When optimizing structs, it's important to consider the specific use case and access patterns of the struct variables to strike a balance between storage efficiency and readability.
+
+Remember to arrange the struct fields in descending order of their sizes and pack smaller variables together to minimize wasted space within the 32-byte slots used by Solidity's storage layout.
 
 ## Example of storage variable caching
 
