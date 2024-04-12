@@ -10,6 +10,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/unpackdev/solgo/ast"
+	"github.com/unpackdev/solgo/printer/ast_printer"
 	"go.uber.org/zap"
 )
 
@@ -52,7 +53,10 @@ func optimizeHandler(c *gin.Context) {
 		return
 	}
 
-	detector, err := printer.GetDetectorCode(ctx, input.ContractCode)
+	builder, err := printer.GetBuilderCode(ctx, input.ContractCode)
+	if err != nil {
+		zap.L().Error("Failed to get builder", zap.Error(err))
+	}
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -61,21 +65,22 @@ func optimizeHandler(c *gin.Context) {
 	}
 
 	// Parse the contract
-	if err := detector.Parse(); err != nil {
+	if err := builder.Parse(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		zap.L().Error("Failed to parse contract", zap.Errors("parse errors", err))
 		return
 	}
 
 	// Build the contract
-	if err := detector.Build(); err != nil {
+	if err := builder.Build(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		zap.L().Error("Failed to build contract", zap.Error(err))
 		return
 	}
 
+	ast := builder.GetAstBuilder()
+
 	// Resolve references
-	ast := detector.GetAST()
 	if err := resolveReferences(ast); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		zap.L().Error("Failed to resolve references", zap.Error(err))
@@ -85,12 +90,11 @@ func optimizeHandler(c *gin.Context) {
 	rootNode := ast.GetRoot()
 
 	// Optimize the contract
-	opt := optimizer.NewOptimizer(detector.GetIR())
+	opt := optimizer.NewOptimizer(builder)
 	optimizeContract(opt, input.Options)
 
-	printer_opt := printer.New()
-	printer_opt.Print(rootNode)
-	c.JSON(http.StatusOK, gin.H{"optimizedCode": printer_opt.Output()})
+	res, _ := ast_printer.Print(rootNode.GetSourceUnits()[0])
+	c.JSON(http.StatusOK, gin.H{"optimizedCode": res})
 
 }
 

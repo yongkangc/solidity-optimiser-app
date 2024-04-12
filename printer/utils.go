@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 
 	"github.com/unpackdev/solgo"
 	"github.com/unpackdev/solgo/ir"
@@ -28,56 +29,73 @@ func GetBuilder(ctx context.Context, filePath string) (*ir.Builder, error) {
 	return ir.NewBuilderFromSources(ctx, sources)
 }
 
-// getDetector returns a detector instance for the given code
-
-func GetDetectorCode(ctx context.Context, solidityCode string) (*detector.Detector, error) {
-
-	contractName, err := getContractName(solidityCode)
-	
+func GetBuilderCode(ctx context.Context, code string) (*ir.Builder, error) {
+	contractName, err := getContractName(code)
 	if err != nil {
 		return nil, err
 	}
-
 	sources := &solgo.Sources{
 		SourceUnits: []*solgo.SourceUnit{
 			{
 				Name:    contractName,
-				Content: solidityCode,
+				Content: code,
 			},
 		},
 		EntrySourceUnitName: contractName,
-		// Path where additional third party such as openzeppelin are
 	}
-
-	config, err := solc.NewDefaultConfig()
-	if err != nil {
-		zap.L().Error("Failed to construct solc config", zap.Error(err))
-		return nil, err
-	}
-
-	usr, err := user.Current()
-	if err != nil {
-		zap.L().Error("Failed to get current user", zap.Error(err))
-		return nil, err
-	}
-
-	// Make sure that {HOME}/.solc/releases exists prior running this example.
-	releasesPath := filepath.Join(usr.HomeDir, ".solc", "releases")
-	if err = config.SetReleasesPath(releasesPath); err != nil {
-		zap.L().Error("Failed to set releases path", zap.Error(err))
-		return nil, err
-	}
-
-	compiler, err := solc.New(ctx, config)
-	if err != nil {
-		zap.L().Error("Failed to construct solc compiler", zap.Error(err))
-		return nil, err
-	}
-
-	return detector.NewDetectorFromSources(ctx, compiler, sources)
+	return ir.NewBuilderFromSources(ctx, sources)
 }
 
-// Uses Regex to get the contract name from the code
+// getDetector returns a detector instance for the given code
+
+// func GetDetectorCode(ctx context.Context, solidityCode string) (*detector.Detector, error) {
+//
+//		contractName, err := getContractName(solidityCode)
+//
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		sources := &solgo.Sources{
+//			SourceUnits: []*solgo.SourceUnit{
+//				{
+//					Name:    contractName,
+//					Content: solidityCode,
+//				},
+//			},
+//			EntrySourceUnitName: contractName,
+//			// Path where additional third party such as openzeppelin are
+//		}
+//
+//		config, err := solc.NewDefaultConfig()
+//		if err != nil {
+//			zap.L().Error("Failed to construct solc config", zap.Error(err))
+//			return nil, err
+//		}
+//
+//		usr, err := user.Current()
+//		if err != nil {
+//			zap.L().Error("Failed to get current user", zap.Error(err))
+//			return nil, err
+//		}
+//
+//		// Make sure that {HOME}/.solc/releases exists prior running this example.
+//		releasesPath := filepath.Join(usr.HomeDir, ".solc", "releases")
+//		if err = config.SetReleasesPath(releasesPath); err != nil {
+//			zap.L().Error("Failed to set releases path", zap.Error(err))
+//			return nil, err
+//		}
+//
+//		compiler, err := solc.New(ctx, config)
+//		if err != nil {
+//			zap.L().Error("Failed to construct solc compiler", zap.Error(err))
+//			return nil, err
+//		}
+//
+//		return detector.NewDetectorFromSources(ctx, compiler, sources)
+//	}
+//
+// // Uses Regex to get the contract name from the code
 func getContractName(solidityCode string) (string, error) {
 
 	// TODO: Deal with case of multiple contracts in a single file
