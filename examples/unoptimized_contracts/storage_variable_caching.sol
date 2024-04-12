@@ -5,7 +5,7 @@ contract Counter1 {
     uint256 public number;
     int256[] public arr;
 
-    function increment() public {
+    function increment() public view {
         require(number < 10);
         number = number + 1;
     }
