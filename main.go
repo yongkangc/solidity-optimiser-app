@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/unpackdev/solgo/ast"
+	"github.com/unpackdev/solgo/printer/ast_printer"
 	"go.uber.org/zap"
 )
 
@@ -50,7 +52,7 @@ func main() {
 
 	if config.printOutput {
 		fmt.Println("UNOPTIMIZED====================")
-		fmt.Println(ast.GetRoot().ToSource())
+		printRoot(ast.GetRoot())
 		fmt.Println("================================")
 	}
 	opt := optimizer.NewOptimizer(builder)
@@ -66,9 +68,17 @@ func main() {
 
 	if config.printOutput {
 		fmt.Println("OPTIMIZED======================")
-		fmt.Println(ast.GetRoot().ToSource())
+		printRoot(ast.GetRoot())
 		fmt.Println("================================")
 	}
+}
+
+func printRoot(root *ast.RootNode) {
+	str, ok := ast_printer.Print(root.GetSourceUnits()[0])
+	if !ok {
+		zap.L().Error("Failed to print root")
+	}
+	fmt.Println(str)
 }
 
 type Config struct {
