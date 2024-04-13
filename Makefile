@@ -8,7 +8,7 @@ update-submodules:
 start: run-frontend run-backend
 
 run-frontend:
-	tmux new-session -d -s frontend "cd frontend && npm run dev"
+	tmux new-session -d -s frontend "cd frontend && npm install && npm run dev"
 
 run-backend:
 	tmux new-session -d -s backend "cd backend && go run main.go"

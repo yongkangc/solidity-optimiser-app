@@ -19,7 +19,7 @@ The goal of this project is to design and implement a CLI and Web app that analy
 
 ## How does our tool optimize the gas of your smart contracts?
 
-### Structured Data Packing
+### Struct Data Packing
 
 - **Concept**: Aligning struct members under 32 bytes together optimizes storage usage on the EVM.
 - **Advantages**: This technique minimizes the number of `SLOAD` or `SSTORE` operations, slashing storage interaction costs by 50% or more when dealing with multiple struct values within a single slot.
