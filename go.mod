@@ -71,8 +71,5 @@ require (
 )
 
 // use this + go get if we make any changes to solgo
-// go get github.com/ExtremelySunnyYK/solgo@v0.0.0-20231223180605-162e6460afd8
-// replace github.com/unpackdev/solgo => github.com/ExtremelySunnyYK/solgo v0.0.0-20231223180605-162e6460afd8
-replace (
- github.com/unpackdev/solgo => github.com/yongkangc/solgo v0.0.0-20240412000000-9855ea1d8efb
-)
+// v0.0.0-timestamp-commithash
+replace github.com/unpackdev/solgo => github.com/yongkangc/solgo v0.0.0-20240412094047-9855ea1d8efb
