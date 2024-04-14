@@ -65,9 +65,6 @@ func (o *Optimizer) optimizeStorageVariableCaching() {
 			}
 
 			for _, sv := range stateVariables {
-				if !isSupportedType(sv.GetTypeName()) {
-					continue
-				}
 				if _, ok := referencesToStateVariables[sv.GetId()]; !ok {
 					continue
 				}
@@ -86,7 +83,6 @@ func InsertCachedVariable(body *ast.BodyNode, sv *ast.StateVariableDeclaration) 
 	// create a new variable declaration
 	cachedName := fmt.Sprintf("cached_%s", sv.GetName())
 	cachedVarDeclaration := &ast.VariableDeclaration{
-		Id: sv.GetNextID(), // HACK: this is probably bad
 		Declarations: []*ast.Declaration{
 			{
 				Name:     cachedName,
@@ -103,13 +99,4 @@ func InsertCachedVariable(body *ast.BodyNode, sv *ast.StateVariableDeclaration) 
 	}
 	// put the new variable declaration at the beginning of the function body
 	body.Statements = append([]ast.Node[ast.NodeType]{cachedVarDeclaration}, body.Statements...)
-}
-
-// isSupportedType checks if the type is supported for caching
-func isSupportedType(t *ast.TypeName) bool {
-	name := t.GetName()
-	if _, ok := sizeMap[name]; ok {
-		return true
-	}
-	return false
 }

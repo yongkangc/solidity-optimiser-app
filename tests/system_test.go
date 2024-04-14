@@ -102,12 +102,12 @@ func testHelper(options Options) bool {
 }
 
 func TestOptimiser(t *testing.T) {
-	verbose := true
+	verbose := false
 	tests := []Options{
-		// {filepath: "struct_packing.sol", printOutput: verbose, calldata: false, structpack: true, storagevarcache: false},
-		// {filepath: "storage_variable_caching.sol", printOutput: verbose, calldata: false, structpack: false, storagevarcache: true},
-		// {filepath: "calldata.sol", printOutput: verbose, calldata: true, structpack: false, storagevarcache: false},
-		{filepath: "OptimizationShowcase.sol", printOutput: verbose, calldata: false, structpack: false, storagevarcache: true},
+		{filepath: "struct_packing.sol", printOutput: verbose, calldata: false, structpack: true, storagevarcache: false},
+		{filepath: "storage_variable_caching.sol", printOutput: verbose, calldata: false, structpack: false, storagevarcache: true},
+		{filepath: "calldata.sol", printOutput: verbose, calldata: true, structpack: false, storagevarcache: false},
+		{filepath: "OptimizationShowcase.sol", printOutput: verbose, calldata: true, structpack: true, storagevarcache: true},
 	}
 	for _, test := range tests {
 		if testHelper(test) {
