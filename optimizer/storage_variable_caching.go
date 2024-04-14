@@ -58,8 +58,17 @@ func (o *Optimizer) optimizeStorageVariableCaching() {
 				return true, nil
 			})
 
+			for sv, ref := range referencesToStateVariables {
+				if len(ref) < 2 {
+					delete(referencesToStateVariables, sv)
+				}
+			}
+
 			for _, sv := range stateVariables {
 				if !isSupportedType(sv.GetTypeName()) {
+					continue
+				}
+				if _, ok := referencesToStateVariables[sv.GetId()]; !ok {
 					continue
 				}
 				// HACK: doing this screws up the numbering of the nodes
