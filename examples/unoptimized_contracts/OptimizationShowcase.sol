@@ -31,6 +31,8 @@ contract OptimizationShowcase {
 
     // Unoptimized function
     function calculateSumUnoptimized() public view returns (uint256) {
+        require(variable1 < 10, "Variable1 should be less than 10");
+        require(variable2 < 10, "Variable2 should be less than 10");
         uint256 sum = variable1 + variable2;
         return sum;
     }
