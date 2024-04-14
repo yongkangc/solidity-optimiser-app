@@ -12,6 +12,17 @@ type OptimizationOptions = {
   callData: boolean;
 };
 
+// Option name
+const optimizationOptionsNames: { [K in keyof OptimizationOptions]: string } = {
+  structPacking: "Struct Packing",
+  storageVariableCaching: "Storage Variable Caching",
+  callData: "Call Data",
+};
+
+function getOptionName<K extends keyof OptimizationOptions>(option: K): string {
+  return optimizationOptionsNames[option];
+}
+
 export default function Home() {
   const [inputCode, setInputCode] = useState("");
   const [optimizedCode, setOptimizedCode] = useState("");
@@ -126,20 +137,24 @@ export default function Home() {
             </label>
             <div className="space-y-2">
               {Object.entries(optimizationOptions).map(([option, enabled]) => (
-                <motion.div key={option} variants={itemVariants}>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={enabled}
-                      onChange={() =>
-                        handleOptimizationOptionChange(
-                          option as keyof OptimizationOptions
-                        )
-                      }
-                      className="form-checkbox h-5 w-5 text-blue-500 transition duration-300"
-                    />
-                    <span className="ml-2">{option}</span>
-                  </label>
+                <motion.div
+                  key={option}
+                  variants={itemVariants}
+                  className="flex items-center space-x-2"
+                >
+                  <input
+                    type="checkbox"
+                    checked={enabled}
+                    onChange={() =>
+                      handleOptimizationOptionChange(
+                        option as keyof OptimizationOptions
+                      )
+                    }
+                    className="form-checkbox h-5 w-5 text-blue-500 transition duration-300"
+                  />
+                  <span>
+                    {getOptionName(option as keyof OptimizationOptions)}
+                  </span>
                 </motion.div>
               ))}
             </div>
@@ -177,9 +192,11 @@ export default function Home() {
             >
               <div>
                 <h3 className="text-2xl font-bold mb-4">Original Code</h3>
-                <SyntaxHighlighter language="solidity" style={atomDark}>
-                  {inputCode}
-                </SyntaxHighlighter>
+                <div className="flex-grow overflow-auto">
+                  <SyntaxHighlighter language="solidity" style={atomDark}>
+                    {inputCode}
+                  </SyntaxHighlighter>
+                </div>
               </div>
               <div>
                 <h3 className="text-2xl font-bold mb-4">Optimized Code</h3>
