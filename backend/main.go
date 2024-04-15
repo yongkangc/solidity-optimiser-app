@@ -91,10 +91,16 @@ func optimizeHandler(c *gin.Context) {
 
 	// Optimize the contract
 	opt := optimizer.NewOptimizer(builder)
+	unoptimized, ok := ast_printer.Print(rootNode.GetSourceUnits()[0])
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to print unoptimized code"})
+		zap.L().Error("Failed to print unoptimized code")
+		return
+	}
 	optimizeContract(opt, input.Options)
+	optimisedCode, _ := ast_printer.Print(rootNode.GetSourceUnits()[0])
 
-	res, _ := ast_printer.Print(rootNode.GetSourceUnits()[0])
-	c.JSON(http.StatusOK, gin.H{"optimizedCode": res})
+	c.JSON(http.StatusOK, gin.H{"optimizedCode": optimisedCode, "unoptimizedCode": unoptimized})
 
 }
 
@@ -108,9 +114,6 @@ func resolveReferences(ast *ast.ASTBuilder) error {
 }
 
 func optimizeContract(opt *optimizer.Optimizer, config OptimizationConfig) {
-	// opt.CacheStorageVariables()
-	// TODO: Add more optimization functions here
-	// opt.PackStructs()
 	if config.StructPacking {
 		opt.PackStructs()
 	}

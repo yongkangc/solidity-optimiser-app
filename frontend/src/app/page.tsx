@@ -25,6 +25,7 @@ function getOptionName<K extends keyof OptimizationOptions>(option: K): string {
 
 export default function Home() {
   const [inputCode, setInputCode] = useState("");
+  const [unoptimizedCode, setUnoptimizedCode] = useState("");
   const [optimizedCode, setOptimizedCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -54,7 +55,8 @@ export default function Home() {
 
       if (response.ok) {
         const data = await response.json();
-        setOptimizedCode(data.optimizedCode);
+        setOptimizedCode(data.data.optimizedCode);
+        setUnoptimizedCode(data.data.unoptimizedCode);
       } else {
         const errorData = await response.json();
         setError(errorData.error);
@@ -68,7 +70,7 @@ export default function Home() {
   };
 
   const handleOptimizationOptionChange = (
-    option: keyof OptimizationOptions
+    option: keyof OptimizationOptions,
   ) => {
     setOptimizationOptions((prevOptions) => ({
       ...prevOptions,
@@ -139,7 +141,7 @@ export default function Home() {
                   checked={enabled}
                   onChange={() =>
                     handleOptimizationOptionChange(
-                      option as keyof OptimizationOptions
+                      option as keyof OptimizationOptions,
                     )
                   }
                   className="form-checkbox h-5 w-5 text-blue-500 transition duration-300"
@@ -185,7 +187,7 @@ export default function Home() {
             <div>
               <h3 className="text-2xl font-bold mb-4">Original Code</h3>
               <SyntaxHighlighter language="solidity" style={atomDark}>
-                {inputCode}
+                {unoptimizedCode}
               </SyntaxHighlighter>
             </div>
             <div>

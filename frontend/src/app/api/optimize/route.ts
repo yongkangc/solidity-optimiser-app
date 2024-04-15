@@ -4,9 +4,9 @@ export async function POST(request: Request) {
   const { contractCode, opts } = await request.json();
 
   // Call your backend API here to optimize the code
-  const optimizedCode = await optimizeCode(contractCode, opts);
+  const data = await optimizeCode(contractCode, opts);
 
-  return NextResponse.json({ optimizedCode });
+  return NextResponse.json({ data });
 }
 
 // Helper function to call your backend API
@@ -21,7 +21,7 @@ async function optimizeCode(contractCode: string, opts: OptimizationConfig) {
 
   if (response.ok) {
     const data = await response.json();
-    return data.optimizedCode;
+    return data;
   } else {
     const error = await response.text();
     throw new Error("Optimization failed due to: " + error);
