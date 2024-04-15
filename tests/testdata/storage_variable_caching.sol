@@ -11,7 +11,6 @@ contract Counter1 {
         return incremented;
     }
 
-    // probably shouldnt optimise this
     function sum() public view returns (int256) {
         int256 sum = 0;
         for (uint256 i = 0; i < arr.length; i++) {

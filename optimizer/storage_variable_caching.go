@@ -2,6 +2,7 @@ package optimizer
 
 import (
 	"fmt"
+	"strings"
 
 	ast_pb "github.com/unpackdev/protos/dist/go/ast"
 	"github.com/unpackdev/solgo/ast"
@@ -82,11 +83,28 @@ func (o *Optimizer) optimizeStorageVariableCaching() {
 func InsertCachedVariable(body *ast.BodyNode, sv *ast.StateVariableDeclaration) {
 	// create a new variable declaration
 	cachedName := fmt.Sprintf("cached_%s", sv.GetName())
+
+	// check if the type of the state variable is a reference type
+	hasStorageLocation := false
+	referenceTypes := []string{"mapping", "array", "struct"}
+	for _, t := range referenceTypes {
+		if strings.Contains(sv.GetTypeDescription().GetIdentifier(), t) {
+			hasStorageLocation = true
+			break
+		}
+	}
+	// if the type is a reference type, we need to store it in memory
+	loc := ast_pb.StorageLocation_DEFAULT
+	if hasStorageLocation {
+		loc = ast_pb.StorageLocation_MEMORY
+	}
+
 	cachedVarDeclaration := &ast.VariableDeclaration{
 		Declarations: []*ast.Declaration{
 			{
-				Name:     cachedName,
-				TypeName: sv.GetTypeName(),
+				Name:            cachedName,
+				TypeName:        sv.GetTypeName(),
+				StorageLocation: loc,
 			},
 		},
 		NodeType: ast_pb.NodeType_VARIABLE_DECLARATION,
