@@ -4,6 +4,6 @@ out = "out"
 libs = ["lib"]
 offline = true
 solc_version = "./solc"
-gas_reports = ["*"]
+gas_reports = ["Optimized", "Unoptimized"]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

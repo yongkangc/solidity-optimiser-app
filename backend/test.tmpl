@@ -1,0 +1,8 @@
+pragma solidity ^0.8.13;
+
+import {Test, console} from "forge-std/Test.sol";
+import { {{ .ContractName }} } from "../src/{{ .FileName }}";
+
+contract StorageTest is Test {
+    {{ .Test }}
+}

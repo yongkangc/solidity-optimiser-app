@@ -27,6 +27,7 @@ export default function Home() {
   const [inputCode, setInputCode] = useState("");
   const [unoptimizedCode, setUnoptimizedCode] = useState("");
   const [optimizedCode, setOptimizedCode] = useState("");
+  const [testCode, setTestCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [optimizationOptions, setOptimizationOptions] =
@@ -49,6 +50,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           contractCode: inputCode,
+          testCode: testCode,
           opts: optimizationOptions,
         }),
       });
@@ -115,16 +117,29 @@ export default function Home() {
       )}
 
       <motion.form onSubmit={handleSubmit} variants={itemVariants}>
-        <div className="mb-8 px-8">
-          <label htmlFor="inputCode" className="block mb-2 font-bold">
-            Enter Solidity Code:
-          </label>
-          <textarea
-            id="inputCode"
-            className="w-full h-64 p-4 bg-gray-700 text-white border border-gray-600 rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={inputCode}
-            onChange={(e) => setInputCode(e.target.value)}
-          />
+        <div className="flex">
+          <div className="mb-4 px-4 w-full">
+            <label htmlFor="inputCode" className="block mb-2 font-bold">
+              Enter Solidity Code:
+            </label>
+            <textarea
+              id="inputCode"
+              className="w-full h-64 p-4 bg-gray-700 text-white border border-gray-600 rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={inputCode}
+              onChange={(e) => setInputCode(e.target.value)}
+            />
+          </div>
+          <div className="mb-4 px-4 w-full">
+            <label htmlFor="testCode" className="block mb-2 font-bold">
+              Enter Test Code:
+            </label>
+            <textarea
+              id="testCode"
+              className="w-full h-64 p-4 bg-gray-700 text-white border border-gray-600 rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={testCode}
+              onChange={(e) => setTestCode(e.target.value)}
+            />
+          </div>
         </div>
 
         <div className="mb-8 px-8">

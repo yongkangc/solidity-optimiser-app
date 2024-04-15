@@ -7,6 +7,8 @@ import (
 	"optimizer/optimizer/logger"
 	"optimizer/optimizer/optimizer"
 	"optimizer/optimizer/printer"
+	"os"
+	"text/template"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -47,6 +49,7 @@ func optimizeHandler(c *gin.Context) {
 
 	var input struct {
 		ContractCode string             `json:"contractCode"`
+		TestCode     string             `json:"testCode"`
 		Options      OptimizationConfig `json:"opts"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -108,9 +111,11 @@ func optimizeHandler(c *gin.Context) {
 			zap.L().Error("Failed to write optimized code to file system", zap.Error(err))
 		}
 	}
+	if input.TestCode != "" {
+		tryTestFile(input.TestCode)
+	}
 
 	c.JSON(http.StatusOK, gin.H{"optimizedCode": optimisedCode, "unoptimizedCode": unoptimized})
-
 }
 
 func resolveReferences(ast *ast.ASTBuilder) error {
@@ -132,4 +137,24 @@ func optimizeContract(opt *optimizer.Optimizer, config OptimizationConfig) {
 	if config.CallData {
 		opt.OptimizeCallData()
 	}
+}
+
+func tryTestFile(test string) {
+	type testStruct struct {
+		Test         string
+		ContractName string
+		FileName     string
+	}
+
+	tmplFile := "test.tmpl"
+	tmpl, err := template.New(tmplFile).ParseFiles(tmplFile)
+	if err != nil {
+		panic(err)
+	}
+	err = tmpl.Execute(os.Stdout, testStruct{
+		Test:         test,
+		ContractName: "Counter",
+		FileName:     "Counter.sol",
+	},
+	)
 }
