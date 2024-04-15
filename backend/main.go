@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io/ioutil"
 	"net/http"
 	"optimizer/optimizer/logger"
 	"optimizer/optimizer/optimizer"
@@ -92,13 +93,21 @@ func optimizeHandler(c *gin.Context) {
 	// Optimize the contract
 	opt := optimizer.NewOptimizer(builder)
 	unoptimized, ok := ast_printer.Print(rootNode.GetSourceUnits()[0])
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to print unoptimized code"})
-		zap.L().Error("Failed to print unoptimized code")
-		return
+	if ok {
+		// write unoptimized code to file system
+		if err := ioutil.WriteFile("../estimator/src/unoptimized.sol", []byte(unoptimized), 0644); err != nil {
+			zap.L().Error("Failed to write unoptimized code to file system", zap.Error(err))
+		}
 	}
+
 	optimizeContract(opt, input.Options)
-	optimisedCode, _ := ast_printer.Print(rootNode.GetSourceUnits()[0])
+	optimisedCode, ok := ast_printer.Print(rootNode.GetSourceUnits()[0])
+	if ok {
+		// write unoptimized code to file system
+		if err := ioutil.WriteFile("../estimator/src/optimized.sol", []byte(optimisedCode), 0644); err != nil {
+			zap.L().Error("Failed to write optimized code to file system", zap.Error(err))
+		}
+	}
 
 	c.JSON(http.StatusOK, gin.H{"optimizedCode": optimisedCode, "unoptimizedCode": unoptimized})
 
