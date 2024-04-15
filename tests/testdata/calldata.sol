@@ -24,7 +24,7 @@ contract ArraySumCalculator {
     }
 
     // function is not pure or view, so it should not be optimized
-    function shouldntOptimiseThis(uint256[] memory numbers) returns (uint256) {
+    function shouldntOptimiseThis(uint256[] memory numbers) public returns (uint256) {
         uint256 sum = 0;
         for (uint256 i = 0; i < numbers.length; ++i) {
             sum += numbers[i];
