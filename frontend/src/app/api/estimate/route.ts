@@ -1,22 +1,22 @@
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const { contractCode, opts } = await request.json();
+  const { testCode } = await request.json();
 
   // Call your backend API here to optimize the code
-  const data = await optimizeCode(contractCode, opts);
+  const data = await estimateGas(testCode);
 
   return NextResponse.json({ data });
 }
 
 // Helper function to call your backend API
-async function optimizeCode(contractCode: string, opts: OptimizationConfig) {
-  const response = await fetch("http://localhost:8080/optimize", {
+async function estimateGas(testCode: string) {
+  const response = await fetch("http://localhost:8080/estimate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ contractCode, opts }),
+    body: JSON.stringify({ testCode }),
   });
 
   if (response.ok) {
@@ -27,9 +27,3 @@ async function optimizeCode(contractCode: string, opts: OptimizationConfig) {
     throw new Error("Optimization failed due to: " + error);
   }
 }
-
-type OptimizationConfig = {
-  structPacking: boolean;
-  storageVariableCaching: boolean;
-  callData: boolean;
-};

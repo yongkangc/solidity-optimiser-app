@@ -7,6 +7,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { motion } from "framer-motion";
 import { DiffEditor, Editor } from "@monaco-editor/react";
+import Ansi from "ansi-to-react";
 import EthIcon from "./ethereum-eth-logo.svg";
 
 type OptimizationOptions = {
@@ -27,12 +28,22 @@ function getOptionName<K extends keyof OptimizationOptions>(option: K): string {
 }
 
 export default function Home() {
+  const exampleTestCode = `
+// Example test code
+function test() public view {
+    // use the myContract variable to interact with the contract
+    myContract.increment();
+}
+    `;
   const [inputCode, setInputCode] = useState("");
   const [unoptimizedCode, setUnoptimizedCode] = useState("");
   const [optimizedCode, setOptimizedCode] = useState("");
-  const [testCode, setTestCode] = useState("");
+  const [testCode, setTestCode] = useState(exampleTestCode);
   const [enableDiff, setEnableDiff] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEstimatorLoading, setIsEstimatorLoading] = useState(false);
+  const [estimation, setEstimation] = useState("");
+  const [estimationVisible, setEstimationVisible] = useState(false);
   const [error, setError] = useState("");
   const [isErrorVisible, setIsErrorVisible] = useState(false);
   const [optimizationOptions, setOptimizationOptions] =
@@ -50,7 +61,7 @@ export default function Home() {
     }
   }, [error, 5000]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitOptimize = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
@@ -84,6 +95,38 @@ export default function Home() {
     }
   };
 
+  const handleSubmitEstimate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsEstimatorLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/estimate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          testCode: testCode,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setEstimation(data.data.output);
+        setEstimationVisible(true);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error);
+      }
+    } catch (error: any) {
+      console.error("Error:", error);
+      setError("An unexpected error occurred.");
+    } finally {
+      setIsEstimatorLoading(false);
+    }
+  };
+
   const handleOptimizationOptionChange = (
     option: keyof OptimizationOptions,
   ) => {
@@ -106,24 +149,12 @@ export default function Home() {
     visible: { opacity: 1, y: 0 },
   };
 
-  const functionList: functionSignature[] = [
-    {
-      name: "SUM",
-      args: ["arg1", "arg2"],
-    },
-    {
-      name: "functionName2",
-      args: ["arg1", "arg2"],
-    },
-  ];
-
-  const functionComponent = functionCallItem(functionList[0]);
   const defaultWarning =
     "// Enter your Solidity code here\n// Make sure that the code is syntactically correct\n// This tool is still in development and may not work as expected\n// Please use at your own risk\n// If you encounter any issues, please report them on the GitHub repository\n//";
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-slate-800 to-gray-700 text-white text-sm"
+      className="min-h-screen h-full bg-gradient-to-br from-slate-800 to-gray-700 text-white text-sm overflow-y-auto relative"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -141,7 +172,7 @@ export default function Home() {
           {error}
         </motion.div>
       )}
-      <motion.form onSubmit={handleSubmit} variants={itemVariants}>
+      <motion.form onSubmit={handleSubmitOptimize} variants={itemVariants}>
         <div className="flex space-x-2 px-2 pt-2">
           <div className="flex flex-col w-1/3 px-4 bg-stone-900 justify-between">
             <div className="space-y-2 text-sm">
@@ -152,7 +183,7 @@ export default function Home() {
                 <motion.div
                   key={option}
                   variants={itemVariants}
-                  className={`flex items-center space-x-2 ${enabled ? "text-green-400" : "text-white"} cursor-pointer transition duration-300 hover:text-green-400`}
+                  className={`flex items-center space-x-2 ${enabled ? "text-green-400" : "text-white"} cursor-pointer transition duration-300 hover:text-green-500`}
                   onClick={() =>
                     handleOptimizationOptionChange(
                       option as keyof OptimizationOptions,
@@ -194,50 +225,13 @@ export default function Home() {
               }
             />
           </div>
-          {/* New form for function and arguments */}
-          <div className="flex-col w-1/3 mt-8 mb-6 px-4 border border-gray-600 rounded-lg hidden">
-            <div className="flex">
-              <div className="w-1/2 mr-2">
-                <label
-                  htmlFor="functionName"
-                  className="block mb-2 font-bold"
-                ></label>
-                <input
-                  id="functionName"
-                  type="text"
-                  className="w-full h-3 p-4 bg-gray-700 text-white border border-gray-600 rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="functionName"
-                />
-              </div>
-
-              <div className="w-1/2 hidden">
-                <label
-                  htmlFor="functionArgs"
-                  className="block mb-2 font-bold"
-                ></label>
-                <input
-                  id="functionArgs"
-                  type="text"
-                  className="w-full h-3 p-4 bg-gray-700 text-white border border-gray-600 rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="args"
-                  // Add validation logic for comma-separated values and data types (optional)
-                />
-              </div>
-            </div>
-            <button
-              type="button"
-              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Estimate
-            </button>
-          </div>
         </div>
       </motion.form>
 
       {optimizedCode && (
         <button
           onClick={() => setEnableDiff(!enableDiff)}
-          className="absolute right-0 bg-blue-600 text-sm text-white mt-2 mx-2 p-1 px-2 font-semibold duration-300 hover:bg-blue-700 focus:outline-none "
+          className="absolute right-0 bg-blue-600 text-sm text-white mt-2 mx-2 p-1 px-3 font-semibold duration-300 hover:bg-blue-700 focus:outline-none "
         >
           Toggle Diff
         </button>
@@ -277,6 +271,7 @@ export default function Home() {
         >
           <motion.div variants={itemVariants}>
             <h3 className="text-xl font-bold mb-2">Diff View</h3>
+            <div className="bg-stone-900 w-full h-4"></div>
             <DiffEditor
               height="60vh"
               language="sol"
@@ -287,33 +282,54 @@ export default function Home() {
           </motion.div>
         </motion.div>
       )}
-    </motion.div>
-  );
-}
-
-interface functionSignature {
-  name: string;
-  // array of args
-  args: string[];
-}
-
-function functionCallItem(fs: functionSignature) {
-  return (
-    <div>
-      <h4>{fs.name}</h4>
-      <ul>
-        {fs.args.map((arg, index) => (
-          <div key={index} className="flex items-center">
-            <input
-              id={`arg-${index}`}
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder={arg} // Use the argument value as the placeholder
+      {optimizedCode && (
+        <motion.div
+          className="m-2"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.form onSubmit={handleSubmitEstimate} variants={itemVariants}>
+            <h3 className="text-xl font-bold mb-2">Estimate Gas</h3>
+            <div className="bg-stone-900 w-full flex flex-row-reverse px-2">
+              <div className="text-center my-2 text-sm">
+                <motion.button
+                  type="submit"
+                  className="bg-blue-600 text-white py-1 px-2 font-bold transition duration-300 hover:bg-blue-700"
+                  disabled={isEstimatorLoading}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isEstimatorLoading ? "..." : "Run"}
+                </motion.button>
+              </div>
+            </div>
+            <Editor
+              height="30vh"
+              defaultLanguage="sol"
+              language="sol"
+              theme="vs-dark"
+              defaultValue={exampleTestCode}
+              value={testCode}
+              onChange={(value) =>
+                value != undefined
+                  ? setTestCode(value)
+                  : console.log("undefined")
+              }
             />
-          </div>
-        ))}
-      </ul>
-    </div>
+            {estimationVisible && (
+              <div className="text-xs bg-stone-900 p-2">
+                {estimation.split("\n").map((estimation) => (
+                  <code>
+                    <br />
+                    <Ansi>{estimation}</Ansi>
+                  </code>
+                ))}
+              </div>
+            )}
+          </motion.form>
+        </motion.div>
+      )}
+    </motion.div>
   );
 }
 

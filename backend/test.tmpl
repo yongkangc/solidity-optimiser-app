@@ -8,7 +8,5 @@ contract {{ .ContractName }}Test is Test {
     function setUp() public {
         myContract = new {{ .ContractName }}();
     }
-    function test() public view {
-        myContract.{{ .Test }};
-    }
+    {{ .Test }}
 }

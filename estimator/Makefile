@@ -7,7 +7,7 @@ build:
 	forge build
 
 estimate:
-	forge test --gas-report
+	forge test
 
 run:
 	make build && make estimate

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -8,6 +9,7 @@ import (
 	"optimizer/optimizer/logger"
 	"optimizer/optimizer/optimizer"
 	"optimizer/optimizer/printer"
+	"os/exec"
 	"strings"
 	"text/template"
 
@@ -35,6 +37,7 @@ func main() {
 
 	r.GET("/health", healthHandler)
 	r.POST("/optimize", optimizeHandler)
+	r.POST("/estimate", estimateHandler)
 
 	r.Run(":8080")
 }
@@ -50,7 +53,6 @@ func optimizeHandler(c *gin.Context) {
 
 	var input struct {
 		ContractCode string             `json:"contractCode"`
-		TestCode     string             `json:"testCode"`
 		Options      OptimizationConfig `json:"opts"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -130,11 +132,36 @@ func optimizeHandler(c *gin.Context) {
 	if err := ioutil.WriteFile("../estimator/src/optimized.sol", []byte(optimized), 0644); err != nil {
 		zap.L().Error("Failed to write optimized code to file system", zap.Error(err))
 	}
-	if input.TestCode != "" {
-		tryTestFile(input.TestCode)
+	c.JSON(http.StatusOK, gin.H{"optimizedCode": optimized, "unoptimizedCode": unoptimized})
+}
+
+func estimateHandler(c *gin.Context) {
+	zap.L().Info("Estimate handler")
+
+	var input struct {
+		TestCode string `json:"testCode"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	tryTestFile(input.TestCode)
+
+	// run make on the test and send the output to the client
+
+	cmd := exec.Command("make", "run")
+	cmd.Dir = "../estimator"
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	var errout bytes.Buffer
+	cmd.Stderr = &errout
+
+	if err := cmd.Run(); err != nil {
+		zap.L().Error("Failed to run make", zap.Error(err), zap.String("stderr", errout.String()))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"optimizedCode": optimized, "unoptimizedCode": unoptimized})
+	c.JSON(http.StatusOK, gin.H{"output": out.String()})
 }
 
 func resolveReferences(ast *ast.ASTBuilder) error {
@@ -178,7 +205,6 @@ func tryTestFile(test string) {
 	}); err != nil {
 		zap.L().Error("Failed to execute template", zap.Error(err))
 	}
-	fmt.Println(optimizedSb.String())
 	ioutil.WriteFile("../estimator/test/optimized.t.sol", []byte(optimizedSb.String()), 0644)
 
 	unoptimizedSb := strings.Builder{}
@@ -191,7 +217,6 @@ func tryTestFile(test string) {
 	}
 	fmt.Println(unoptimizedSb.String())
 	ioutil.WriteFile("../estimator/test/unoptimized.t.sol", []byte(unoptimizedSb.String()), 0644)
-
 }
 
 func renameContract(contract string, oldName string, newName string) string {
