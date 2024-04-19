@@ -122,7 +122,7 @@ export default function Home() {
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-gray-800 to-zinc-800 text-white"
+      className="min-h-screen bg-gradient-to-br from-slate-800 to-gray-700 text-white text-sm"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -141,12 +141,12 @@ export default function Home() {
         </motion.div>
       )}
       <motion.form onSubmit={handleSubmit} variants={itemVariants}>
-        <div className="flex space-x-2 px-4">
-          <div className="flex-col w-1/3 px-4 bg-stone-900">
-            <label className="block font-bold p-2 border-b border-gray-700">
-              Optimizations
-            </label>
-            <div className="space-y-2 p-2 text-sm">
+        <div className="flex space-x-2 px-2 pt-2">
+          <div className="flex flex-col w-1/3 px-4 bg-stone-900 justify-between">
+            <div className="space-y-2 text-sm">
+              <label className="block font-bold py-2 border-b border-gray-700">
+                Optimizations
+              </label>
               {Object.entries(optimizationOptions).map(([option, enabled]) => (
                 <motion.div
                   key={option}
@@ -164,6 +164,17 @@ export default function Home() {
                   </span>
                 </motion.div>
               ))}
+            </div>
+            <div className="text-center my-2 text-sm">
+              <motion.button
+                type="submit"
+                className="w-full bg-blue-600 text-white py-1 font-bold transition duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                disabled={isLoading}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {isLoading ? "Optimizing..." : "Optimize Code"}
+              </motion.button>
             </div>
           </div>
           <div className="w-full">
@@ -217,18 +228,6 @@ export default function Home() {
               Estimate
             </button>
           </div>
-        </div>
-
-        <div className="text-center">
-          <motion.button
-            type="submit"
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold text-lg transition duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            disabled={isLoading}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {isLoading ? "Optimizing..." : "Optimize Code"}
-          </motion.button>
         </div>
       </motion.form>
 
