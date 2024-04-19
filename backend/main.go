@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"optimizer/optimizer/logger"
 	"optimizer/optimizer/optimizer"
 	"optimizer/optimizer/printer"
-	"os"
+	"strings"
 	"text/template"
 
 	"github.com/gin-contrib/cors"
@@ -93,29 +94,47 @@ func optimizeHandler(c *gin.Context) {
 
 	rootNode := ast.GetRoot()
 
-	// Optimize the contract
 	opt := optimizer.NewOptimizer(builder)
-	unoptimized, ok := ast_printer.Print(rootNode.GetSourceUnits()[0])
-	if ok {
-		// write unoptimized code to file system
-		if err := ioutil.WriteFile("../estimator/src/unoptimized.sol", []byte(unoptimized), 0644); err != nil {
-			zap.L().Error("Failed to write unoptimized code to file system", zap.Error(err))
-		}
+	originalCode, ok := ast_printer.Print(rootNode.GetSourceUnits()[0])
+
+	contractName, err := printer.GetContractName(originalCode)
+	if err != nil {
+		zap.L().Error("Failed to get contract name", zap.Error(err))
 	}
 
+	// Rename the contract to Unoptimized
+	unoptimized := renameContract(originalCode, contractName, "Unoptimized")
+	if !ok {
+		zap.L().Error("Error while printing Original AST")
+	}
+
+	// write unoptimized code to file system
+	if err := ioutil.WriteFile("../estimator/src/unoptimized.sol", []byte(unoptimized), 0644); err != nil {
+		zap.L().Error("Failed to write unoptimized code to file system", zap.Error(err))
+	}
+
+	// Optimize the contract
 	optimizeContract(opt, input.Options)
-	optimisedCode, ok := ast_printer.Print(rootNode.GetSourceUnits()[0])
-	if ok {
-		// write unoptimized code to file system
-		if err := ioutil.WriteFile("../estimator/src/optimized.sol", []byte(optimisedCode), 0644); err != nil {
-			zap.L().Error("Failed to write optimized code to file system", zap.Error(err))
-		}
+
+	// Print optimised AST
+	optimizedCode, ok := ast_printer.Print(rootNode.GetSourceUnits()[0])
+	if !ok {
+		// error
+		zap.L().Error("Error while printing Optimised AST")
+	}
+
+	// Rename contract to Optimized
+	optimized := renameContract(optimizedCode, contractName, "Optimized")
+
+	// write unoptimized code to file system
+	if err := ioutil.WriteFile("../estimator/src/optimized.sol", []byte(optimized), 0644); err != nil {
+		zap.L().Error("Failed to write optimized code to file system", zap.Error(err))
 	}
 	if input.TestCode != "" {
 		tryTestFile(input.TestCode)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"optimizedCode": optimisedCode, "unoptimizedCode": unoptimized})
+	c.JSON(http.StatusOK, gin.H{"optimizedCode": optimized, "unoptimizedCode": unoptimized})
 }
 
 func resolveReferences(ast *ast.ASTBuilder) error {
@@ -151,10 +170,30 @@ func tryTestFile(test string) {
 	if err != nil {
 		panic(err)
 	}
-	err = tmpl.Execute(os.Stdout, testStruct{
+	optimizedSb := strings.Builder{}
+	if err := tmpl.Execute(&optimizedSb, testStruct{
 		Test:         test,
-		ContractName: "Counter",
-		FileName:     "Counter.sol",
-	},
-	)
+		ContractName: "Optimized",
+		FileName:     "optimized.sol",
+	}); err != nil {
+		zap.L().Error("Failed to execute template", zap.Error(err))
+	}
+	fmt.Println(optimizedSb.String())
+	ioutil.WriteFile("../estimator/test/optimized.t.sol", []byte(optimizedSb.String()), 0644)
+
+	unoptimizedSb := strings.Builder{}
+	if err := tmpl.Execute(&unoptimizedSb, testStruct{
+		Test:         test,
+		ContractName: "Unoptimized",
+		FileName:     "unoptimized.sol",
+	}); err != nil {
+		zap.L().Error("Failed to execute template", zap.Error(err))
+	}
+	fmt.Println(unoptimizedSb.String())
+	ioutil.WriteFile("../estimator/test/unoptimized.t.sol", []byte(unoptimizedSb.String()), 0644)
+
+}
+
+func renameContract(contract string, oldName string, newName string) string {
+	return strings.ReplaceAll(contract, oldName, newName)
 }

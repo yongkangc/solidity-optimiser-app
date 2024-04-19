@@ -3,6 +3,12 @@ pragma solidity ^0.8.13;
 import {Test, console} from "forge-std/Test.sol";
 import { {{ .ContractName }} } from "../src/{{ .FileName }}";
 
-contract StorageTest is Test {
-    {{ .Test }}
+contract {{ .ContractName }}Test is Test {
+    {{ .ContractName }} public myContract;
+    function setUp() public {
+        myContract = new {{ .ContractName }}();
+    }
+    function test() public view {
+        myContract.{{ .Test }};
+    }
 }
