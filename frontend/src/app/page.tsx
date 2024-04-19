@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { motion } from "framer-motion";
-import { Editor } from "@monaco-editor/react";
+import { DiffEditor, Editor } from "@monaco-editor/react";
 import EthIcon from "./ethereum-eth-logo.svg";
 
 type OptimizationOptions = {
@@ -31,6 +31,7 @@ export default function Home() {
   const [unoptimizedCode, setUnoptimizedCode] = useState("");
   const [optimizedCode, setOptimizedCode] = useState("");
   const [testCode, setTestCode] = useState("");
+  const [enableDiff, setEnableDiff] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isErrorVisible, setIsErrorVisible] = useState(false);
@@ -96,7 +97,7 @@ export default function Home() {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { duration: 0.6, staggerChildren: 0.2 },
+      transition: { duration: 0.1, staggerChildren: 0.1 },
     },
   };
 
@@ -135,7 +136,7 @@ export default function Home() {
           initial={{ opacity: 0, y: -10 }} // Initial state (hidden)
           animate={{ opacity: 1, y: 0 }} // Animation on mount
           exit={{ opacity: 0, y: -10 }} // Animation on dismount
-          transition={{ duration: 0.3 }} // Smooth animation
+          transition={{ duration: 0.1 }} // Smooth animation
         >
           {error}
         </motion.div>
@@ -151,7 +152,7 @@ export default function Home() {
                 <motion.div
                   key={option}
                   variants={itemVariants}
-                  className={`flex items-center space-x-2 ${enabled ? "text-green-400" : "text-white"} cursor-pointer`}
+                  className={`flex items-center space-x-2 ${enabled ? "text-green-400" : "text-white"} cursor-pointer transition duration-300 hover:text-green-400`}
                   onClick={() =>
                     handleOptimizationOptionChange(
                       option as keyof OptimizationOptions,
@@ -170,16 +171,18 @@ export default function Home() {
                 type="submit"
                 className="w-full bg-blue-600 text-white py-1 font-bold transition duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 disabled={isLoading}
-                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 {isLoading ? "Optimizing..." : "Optimize Code"}
               </motion.button>
             </div>
           </div>
-          <div className="w-full">
+          <div className="w-full flex-col bg-stone-900">
+            <h3 className="px-4 border-b border-gray-700 font-bold py-2">
+              Input
+            </h3>
             <Editor
-              height="50vh"
+              height="60vh"
               defaultLanguage="sol"
               language="sol"
               theme="vs-dark"
@@ -232,34 +235,55 @@ export default function Home() {
       </motion.form>
 
       {optimizedCode && (
+        <button
+          onClick={() => setEnableDiff(!enableDiff)}
+          className="absolute right-0 bg-blue-600 text-sm text-white mt-2 mx-2 p-1 px-2 font-semibold duration-300 hover:bg-blue-700 focus:outline-none "
+        >
+          Toggle Diff
+        </button>
+      )}
+      {optimizedCode && !enableDiff && (
         <motion.div
-          className="mt-12"
+          className="mt-2"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          <motion.h2
-            className="text-3xl font-bold mb-6 text-center"
-            variants={itemVariants}
-          >
-            Optimized Code
-          </motion.h2>
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-8 px-8"
+            className="grid grid-cols-1 md:grid-cols-2 gap-2 px-2"
             variants={itemVariants}
           >
             <div>
-              <h3 className="text-2xl font-bold mb-4">Original Code</h3>
+              <h3 className="text-xl font-bold mb-2">Unoptimized Code</h3>
               <SyntaxHighlighter language="solidity" style={atomDark}>
                 {unoptimizedCode}
               </SyntaxHighlighter>
             </div>
             <div>
-              <h3 className="text-2xl font-bold mb-4">Optimized Code</h3>
+              <h3 className="text-xl font-bold mb-2">Optimized Code</h3>
               <SyntaxHighlighter language="solidity" style={atomDark}>
                 {optimizedCode}
               </SyntaxHighlighter>
             </div>
+          </motion.div>
+        </motion.div>
+      )}
+      {optimizedCode && enableDiff && (
+        <motion.div
+          className="p-2"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div variants={itemVariants}>
+            <h3 className="text-xl font-bold mb-2">Diff View</h3>
+            <DiffEditor
+              height="60vh"
+              language="sol"
+              theme="vs-dark"
+              original={unoptimizedCode}
+              modified={optimizedCode}
+            />
           </motion.div>
         </motion.div>
       )}
