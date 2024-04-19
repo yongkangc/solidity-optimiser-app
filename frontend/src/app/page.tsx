@@ -2,7 +2,7 @@
 
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { motion } from "framer-motion";
@@ -17,9 +17,9 @@ type OptimizationOptions = {
 
 // Option name
 const optimizationOptionsNames: { [K in keyof OptimizationOptions]: string } = {
-  structPacking: "Struct Packing",
-  storageVariableCaching: "Storage Variable Caching",
-  callData: "Call Data",
+  structPacking: "Pack Structs",
+  storageVariableCaching: "Cache Storage Variables",
+  callData: "Optimise Call Data",
 };
 
 function getOptionName<K extends keyof OptimizationOptions>(option: K): string {
@@ -33,12 +33,21 @@ export default function Home() {
   const [testCode, setTestCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isErrorVisible, setIsErrorVisible] = useState(false);
   const [optimizationOptions, setOptimizationOptions] =
     useState<OptimizationOptions>({
       structPacking: false,
       storageVariableCaching: false,
       callData: false,
     });
+
+  useEffect(() => {
+    if (error) {
+      setIsErrorVisible(true);
+      const timer = setTimeout(() => setIsErrorVisible(false), 5000);
+      return () => clearTimeout(timer); // Cleanup on unmount
+    }
+  }, [error, 5000]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,45 +122,44 @@ export default function Home() {
 
   return (
     <motion.div
-      className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 text-white"
+      className="min-h-screen bg-gradient-to-br from-gray-800 to-zinc-800 text-white"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
       {TopBar()}
-      {error && (
+      {isErrorVisible && (
         <motion.div
-          className="bg-red-500 text-white px-4 py-2 mb-4 rounded"
+          className="bg-red-500 text-white px-4 py-2 text-sm"
           variants={itemVariants}
+          initial={{ opacity: 0, y: -10 }} // Initial state (hidden)
+          animate={{ opacity: 1, y: 0 }} // Animation on mount
+          exit={{ opacity: 0, y: -10 }} // Animation on dismount
+          transition={{ duration: 0.3 }} // Smooth animation
         >
           {error}
         </motion.div>
       )}
-
       <motion.form onSubmit={handleSubmit} variants={itemVariants}>
         <div className="flex space-x-2 px-4">
-          <div className="flex-col w-1/3 p-4 border border-gray-600 ">
-            <label className="block mb-2 font-bold">
-              Optimization Options:
+          <div className="flex-col w-1/3 px-4 bg-stone-900">
+            <label className="block font-bold p-2 border-b border-gray-700">
+              Optimizations
             </label>
-            <div className="space-y-2">
+            <div className="space-y-2 p-2 text-sm">
               {Object.entries(optimizationOptions).map(([option, enabled]) => (
                 <motion.div
                   key={option}
                   variants={itemVariants}
-                  className="flex items-center space-x-2"
+                  className={`flex items-center space-x-2 ${enabled ? "text-green-400" : "text-white"} cursor-pointer`}
+                  onClick={() =>
+                    handleOptimizationOptionChange(
+                      option as keyof OptimizationOptions,
+                    )
+                  }
                 >
-                  <input
-                    type="checkbox"
-                    checked={enabled}
-                    onChange={() =>
-                      handleOptimizationOptionChange(
-                        option as keyof OptimizationOptions,
-                      )
-                    }
-                    className="form-checkbox h-5 w-5 text-blue-500 transition duration-300"
-                  />
                   <span>
+                    {enabled ? "✅ " : "⚡️ "}
                     {getOptionName(option as keyof OptimizationOptions)}
                   </span>
                 </motion.div>
@@ -288,7 +296,7 @@ function functionCallItem(fs: functionSignature) {
 
 function TopBar() {
   return (
-    <header className="border-b border-solid border-gray-700 text-white p-4 flex justify-between items-center mb-4">
+    <header className="border-b border-solid border-gray-700 text-white p-4 flex justify-between items-center">
       <div className="text-sm font-bold flex">
         <div className="mr-4 ">
           <Image src={EthIcon} alt="eth-icon" width={12} height={12} />
