@@ -1,4 +1,10 @@
-.PHONY: update-submodules start run-frontend run-backend kill-all install-dependencies
+.PHONY: update-submodules start run-frontend run-backend kill-all install-dependencies optimiser-test
+
+optimiser-test:
+	@echo "Running Optimiser tests..."
+	go test -v ./...
+	@echo "Optimiser tests passed successfully!"
+
 
 update-submodules:
 	@echo "Updating submodules..."
