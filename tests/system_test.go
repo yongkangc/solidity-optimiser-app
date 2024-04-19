@@ -18,9 +18,10 @@ type Options struct {
 	filepath    string
 	printOutput bool
 
-	calldata        bool
-	structpack      bool
-	storagevarcache bool
+	calldata             bool
+	structpack           bool
+	storagevarcache      bool
+	optimizationExpected bool
 }
 
 func testHelper(options Options) bool {
@@ -93,22 +94,49 @@ func testHelper(options Options) bool {
 		fmt.Println(optimised)
 		fmt.Println("================================")
 	}
-
-	if unoptimised == optimised {
-		fmt.Println("Error: ", "Code not optimised")
-		return false
+	switch options.optimizationExpected {
+	case true:
+		if unoptimised == optimised {
+			fmt.Println("Error: ", "Code not optimised")
+			return false
+		}
+		return true
+	case false:
+		if unoptimised != optimised {
+			fmt.Println("Error: ", "Code should not be optimised")
+			return false
+		}
+		return true
 	}
 	return true
 }
 
 func TestOptimiser(t *testing.T) {
 	verbose := false
+	optimizationExpected := true
 	tests := []Options{
-		{filepath: "struct_packing.sol", printOutput: verbose, calldata: false, structpack: true, storagevarcache: false},
-		{filepath: "storage_variable_caching.sol", printOutput: verbose, calldata: false, structpack: false, storagevarcache: true},
-		{filepath: "calldata.sol", printOutput: verbose, calldata: true, structpack: false, storagevarcache: false},
-		{filepath: "OptimizationShowcase.sol", printOutput: verbose, calldata: true, structpack: true, storagevarcache: true},
+		{filepath: "struct_packing.sol", printOutput: verbose, calldata: false, structpack: true, storagevarcache: false, optimizationExpected: optimizationExpected},
+		{filepath: "storage_variable_caching.sol", printOutput: verbose, calldata: false, structpack: false, storagevarcache: true, optimizationExpected: optimizationExpected},
+		{filepath: "calldata.sol", printOutput: verbose, calldata: true, structpack: false, storagevarcache: false, optimizationExpected: optimizationExpected},
+		{filepath: "OptimizationShowcase.sol", printOutput: verbose, calldata: true, structpack: true, storagevarcache: true, optimizationExpected: optimizationExpected},
 	}
+	for _, test := range tests {
+		if testHelper(test) {
+			t.Logf("Test passed")
+		} else {
+			t.Errorf("Test failed")
+		}
+	}
+}
+
+func TestOptimiserEdgeCase(t *testing.T) {
+	verbose := false
+	optimizationExpected := false
+	tests := []Options{
+		{filepath: "Counter.sol", printOutput: verbose, calldata: true, structpack: true, storagevarcache: true, optimizationExpected: optimizationExpected}, // No optimisations needed
+		{filepath: "Empty.sol", printOutput: verbose, calldata: true, structpack: true, storagevarcache: true, optimizationExpected: optimizationExpected},   // Empty Contract
+	}
+
 	for _, test := range tests {
 		if testHelper(test) {
 			t.Logf("Test passed")

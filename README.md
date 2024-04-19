@@ -101,6 +101,12 @@ By following these steps, you will have downloaded the desired Solidity compiler
 
 Note: Make sure to replace `{HOME}` with the actual path to your home directory if necessary.
 
+
+## Running Tests
+```bash
+make optimiser-test
+```
+
 ## Design
 
 Overall Architecture:
