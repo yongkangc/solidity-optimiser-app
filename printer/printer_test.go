@@ -14,7 +14,63 @@ import (
 	"github.com/unpackdev/solgo/ast"
 )
 
-func setupSampleStructAST(t *testing.T) *ast.RootNode {
+func TestStructPrinter(t *testing.T) {
+	structAstRootNode := setupSampleStructAST(t)
+
+	t.Run("Sample Struct Solidity File", func(t *testing.T) {
+		printer := printer.New()
+		printer.Print(structAstRootNode)
+
+		expectedOutput := `  pragma solidity ^0.8.0;
+  Contract NotOptimizedStruct {
+        struct Employee {
+            uint256 id; 
+            uint32 salary; 
+            uint32 age; 
+            bool isActive; 
+            address addr; 
+            uint16 department; 
+        }
+  }
+`
+		assert.Equal(t, TrimWhitespace(expectedOutput), TrimWhitespace(printer.Output()))
+
+	})
+}
+func TestEmptyContractPrinter(t *testing.T) {
+	emptyContractAstRootNode := setupEmptyContractAST(t) // You need to implement setupEmptyContractAST
+
+	t.Run("Empty Contract Solidity File", func(t *testing.T) {
+		printer := printer.New()
+		printer.Print(emptyContractAstRootNode)
+
+		expectedOutput := `pragma solidity ^0.8.0;ContractEmpty{}`
+		assert.Equal(t, TrimWhitespace(expectedOutput), TrimWhitespace(printer.Output()))
+	})
+}
+
+func TestMultipleContractsPrinter(t *testing.T) {
+	multiContractAstRootNode := setupMultiContractAST(t) // You need to implement setupMultiContractAST
+
+	t.Run("Multiple Contracts Solidity File", func(t *testing.T) {
+		printer := printer.New()
+		printer.Print(multiContractAstRootNode)
+
+		expectedOutput := `pragmasolidity^0.8.0;ContractBase{uint256x;}pragmasolidity^0.8.0;ContractDerivedBase{uint256y;}`
+		assert.Equal(t, TrimWhitespace(expectedOutput), TrimWhitespace(printer.Output()))
+	})
+}
+
+func TrimWhitespace(input string) string {
+	// remove all whitespace from the input string
+	input = strings.ReplaceAll(input, " ", "")
+	input = strings.ReplaceAll(input, "\n", "")
+	return input
+}
+
+// Utility functions for setup
+
+func setUpAst(t *testing.T, filePath string) *ast.RootNode {
 	// Get the current folder path
 	_, testFilePath, _, ok := runtime.Caller(0)
 	if !ok {
@@ -22,7 +78,7 @@ func setupSampleStructAST(t *testing.T) *ast.RootNode {
 	}
 	currentFolderPath := filepath.Dir(testFilePath)
 	// Create the path to the "struct_packing.sol" file relative to the current folder
-	solidityFilePath := filepath.Join(currentFolderPath, "../examples/unoptimized_contracts/struct_packing.sol")
+	solidityFilePath := filepath.Join(currentFolderPath, filePath)
 
 	t.Log("\nSolidity folder path: ", solidityFilePath)
 
@@ -47,34 +103,14 @@ func setupSampleStructAST(t *testing.T) *ast.RootNode {
 	return ast.GetRoot()
 }
 
-func TestStructPrinter(t *testing.T) {
-	structAstRootNode := setupSampleStructAST(t)
-
-	t.Run("Sample Struct Solidity File", func(t *testing.T) {
-		printer := printer.New()
-		printer.Print(structAstRootNode)
-
-		expectedOutput := `  pragma solidity ^0.8.0;
-  Contract NotOptimizedStruct {
-        struct Employee {
-            uint256 id; 
-            uint32 salary; 
-            uint32 age; 
-            bool isActive; 
-            address addr; 
-            uint16 department; 
-        }
-  }
-`
-
-		assert.Equal(t, TrimWhitespace(expectedOutput), TrimWhitespace(printer.Output()))
-
-	})
+func setupSampleStructAST(t *testing.T) *ast.RootNode {
+	return setUpAst(t, "../examples/unoptimized_contracts/struct_packing.sol")
 }
 
-func TrimWhitespace(input string) string {
-	// remove all whitespace from the input string
-	input = strings.ReplaceAll(input, " ", "")
-	input = strings.ReplaceAll(input, "\n", "")
-	return input
+func setupEmptyContractAST(t *testing.T) *ast.RootNode {
+	return setUpAst(t, "../tests/testdata/Empty.sol")
+}
+
+func setupMultiContractAST(t *testing.T) *ast.RootNode {
+	return setUpAst(t, "../tests/testdata/MultipleContracts.sol")
 }
