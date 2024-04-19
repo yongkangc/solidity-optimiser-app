@@ -1,10 +1,13 @@
 "use client";
 
 import Head from "next/head";
+import Image from "next/image";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { motion } from "framer-motion";
+import { Editor } from "@monaco-editor/react";
+import EthIcon from "./ethereum-eth-logo.svg";
 
 type OptimizationOptions = {
   structPacking: boolean;
@@ -93,6 +96,21 @@ export default function Home() {
     visible: { opacity: 1, y: 0 },
   };
 
+  const functionList: functionSignature[] = [
+    {
+      name: "SUM",
+      args: ["arg1", "arg2"],
+    },
+    {
+      name: "functionName2",
+      args: ["arg1", "arg2"],
+    },
+  ];
+
+  const functionComponent = functionCallItem(functionList[0]);
+  const defaultWarning =
+    "// Enter your Solidity code here\n// Make sure that the code is syntactically correct\n// This tool is still in development and may not work as expected\n// Please use at your own risk\n// If you encounter any issues, please report them on the GitHub repository\n//";
+
   return (
     <motion.div
       className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 text-white"
@@ -100,13 +118,7 @@ export default function Home() {
       initial="hidden"
       animate="visible"
     >
-      <motion.h1
-        className="text-4xl font-bold mb-8 text-center pt-8"
-        variants={itemVariants}
-      >
-        Solidity Code Optimizer
-      </motion.h1>
-
+      {TopBar()}
       {error && (
         <motion.div
           className="bg-red-500 text-white px-4 py-2 mb-4 rounded"
@@ -117,55 +129,85 @@ export default function Home() {
       )}
 
       <motion.form onSubmit={handleSubmit} variants={itemVariants}>
-        <div className="flex">
-          <div className="mb-4 px-4 w-full">
-            <label htmlFor="inputCode" className="block mb-2 font-bold">
-              Enter Solidity Code:
+        <div className="flex space-x-2 px-4">
+          <div className="flex-col w-1/3 p-4 border border-gray-600 ">
+            <label className="block mb-2 font-bold">
+              Optimization Options:
             </label>
-            <textarea
-              id="inputCode"
-              className="w-full h-64 p-4 bg-gray-700 text-white border border-gray-600 rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={inputCode}
-              onChange={(e) => setInputCode(e.target.value)}
+            <div className="space-y-2">
+              {Object.entries(optimizationOptions).map(([option, enabled]) => (
+                <motion.div
+                  key={option}
+                  variants={itemVariants}
+                  className="flex items-center space-x-2"
+                >
+                  <input
+                    type="checkbox"
+                    checked={enabled}
+                    onChange={() =>
+                      handleOptimizationOptionChange(
+                        option as keyof OptimizationOptions,
+                      )
+                    }
+                    className="form-checkbox h-5 w-5 text-blue-500 transition duration-300"
+                  />
+                  <span>
+                    {getOptionName(option as keyof OptimizationOptions)}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+          <div className="w-full">
+            <Editor
+              height="50vh"
+              defaultLanguage="sol"
+              language="sol"
+              theme="vs-dark"
+              defaultValue={defaultWarning}
+              onChange={(value) =>
+                value != undefined
+                  ? setInputCode(value)
+                  : console.log("undefined")
+              }
             />
           </div>
-          <div className="mb-4 px-4 w-full">
-            <label htmlFor="testCode" className="block mb-2 font-bold">
-              Enter Test Code:
-            </label>
-            <textarea
-              id="testCode"
-              className="w-full h-64 p-4 bg-gray-700 text-white border border-gray-600 rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={testCode}
-              onChange={(e) => setTestCode(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="mb-8 px-8">
-          <label className="block mb-2 font-bold">Optimization Options:</label>
-          <div className="space-y-2">
-            {Object.entries(optimizationOptions).map(([option, enabled]) => (
-              <motion.div
-                key={option}
-                variants={itemVariants}
-                className="flex items-center space-x-2"
-              >
+          {/* New form for function and arguments */}
+          <div className="flex-col w-1/3 mt-8 mb-6 px-4 border border-gray-600 rounded-lg hidden">
+            <div className="flex">
+              <div className="w-1/2 mr-2">
+                <label
+                  htmlFor="functionName"
+                  className="block mb-2 font-bold"
+                ></label>
                 <input
-                  type="checkbox"
-                  checked={enabled}
-                  onChange={() =>
-                    handleOptimizationOptionChange(
-                      option as keyof OptimizationOptions,
-                    )
-                  }
-                  className="form-checkbox h-5 w-5 text-blue-500 transition duration-300"
+                  id="functionName"
+                  type="text"
+                  className="w-full h-3 p-4 bg-gray-700 text-white border border-gray-600 rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="functionName"
                 />
-                <span>
-                  {getOptionName(option as keyof OptimizationOptions)}
-                </span>
-              </motion.div>
-            ))}
+              </div>
+
+              <div className="w-1/2 hidden">
+                <label
+                  htmlFor="functionArgs"
+                  className="block mb-2 font-bold"
+                ></label>
+                <input
+                  id="functionArgs"
+                  type="text"
+                  className="w-full h-3 p-4 bg-gray-700 text-white border border-gray-600 rounded-lg transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="args"
+                  // Add validation logic for comma-separated values and data types (optional)
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+              className="ml-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Estimate
+            </button>
           </div>
         </div>
 
@@ -215,5 +257,55 @@ export default function Home() {
         </motion.div>
       )}
     </motion.div>
+  );
+}
+
+interface functionSignature {
+  name: string;
+  // array of args
+  args: string[];
+}
+
+function functionCallItem(fs: functionSignature) {
+  return (
+    <div>
+      <h4>{fs.name}</h4>
+      <ul>
+        {fs.args.map((arg, index) => (
+          <div key={index} className="flex items-center">
+            <input
+              id={`arg-${index}`}
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder={arg} // Use the argument value as the placeholder
+            />
+          </div>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function TopBar() {
+  return (
+    <header className="border-b border-solid border-gray-700 text-white p-4 flex justify-between items-center mb-4">
+      <div className="text-sm font-bold flex">
+        <div className="mr-4 ">
+          <Image src={EthIcon} alt="eth-icon" width={12} height={12} />
+        </div>
+        <div>Solidity Gas Optimizer</div>
+      </div>
+      <div className="flex space-x-4 text-sm">
+        <a href="#" className="hover:text-gray-400">
+          Optimizer
+        </a>
+        <a href="#" className="hover:text-gray-400">
+          Github
+        </a>
+        <a href="#" className="hover:text-gray-400">
+          Contact
+        </a>
+      </div>
+    </header>
   );
 }
