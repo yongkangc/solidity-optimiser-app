@@ -30,7 +30,7 @@ func GetBuilder(ctx context.Context, filePath string) (*ir.Builder, error) {
 }
 
 func GetBuilderCode(ctx context.Context, code string) (*ir.Builder, error) {
-	contractName, err := getContractName(code)
+	contractName, err := GetContractName(code)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func GetBuilderCode(ctx context.Context, code string) (*ir.Builder, error) {
 //	}
 //
 // // Uses Regex to get the contract name from the code
-func getContractName(solidityCode string) (string, error) {
+func GetContractName(solidityCode string) (string, error) {
 
 	// TODO: Deal with case of multiple contracts in a single file
 	re := regexp.MustCompile(`contract\s+(\w+)`)
