@@ -20,7 +20,6 @@ To handle struct packing and calldata optimizations, Lexer should recognize and 
 - Storage qualifiers (e.g., memory, calldata, storage)
 - Function definitions and parameters
 - Variable declarations and assignments
-- Comments and whitespace (to keep intact)
 
 ### Parser
 

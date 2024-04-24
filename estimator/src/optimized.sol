@@ -1,19 +1,39 @@
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.0;
 
 contract Optimized {
-  uint256 public number;
-  int256[] public arr;
-  function increment() public view returns (uint256) {
-    uint256 cached_number = number;
-    require(cached_number < 10);
-    uint256 incremented = cached_number + 1;
-    return incremented;
+  struct UnoptimizedProduct {
+    uint256 id;
+    uint256 price;
+    string name;
+    address seller;
+    uint32 quantity;
+    uint32 category;
+    uint16 ratings;
+    bool isAvailable;
   }
-  function sum() public view returns (int256) {
-    int256[] memory cached_arr = arr;
-    int256 sum = 0;
-    for (uint256 i = 0; i < cached_arr.length; i++) {
-      sum += cached_arr[i];
+  uint256 public variable1;
+  uint256 public variable2;
+  function calculateSumUnoptimized() public view returns (uint256) {
+    uint256 sum = variable1 + variable2;
+    return sum;
+  }
+  function calculateSumOptimized() public view returns (uint256) {
+    uint256 v1 = variable1;
+    uint256 v2 = variable2;
+    uint256 sum = v1 + v2;
+    return sum;
+  }
+  function sumOfArrayUnoptimized(uint256[] calldata numbers) external pure returns (uint256) {
+    uint256 sum = 0;
+    for (uint256 i = 0; i < numbers.length; ++i) {
+      sum += numbers[i];
+    }
+    return sum;
+  }
+  function sumOfArrayOptimized(uint256[] calldata numbers) external pure returns (uint256) {
+    uint256 sum = 0;
+    for (uint256 i = 0; i < numbers.length; ++i) {
+      sum += numbers[i];
     }
     return sum;
   }

@@ -30,7 +30,7 @@ kill-all:
 	@tmux list-sessions | grep -E 'frontend|backend' | awk -F':' '{print $$1}' | xargs -I{} tmux kill-session -t {}
 	@echo "All Tmux sessions have been killed."
 
-# For setting up on a fresh computer 
+# For setting up on a fresh computer
 install-dependencies:
 	@echo "Installing dependencies..."
 
@@ -48,10 +48,10 @@ install-dependencies:
 	nvm use 20
 
 	@echo "Installing Golang..."
-	wget https://dl.google.com/go/go1.20.4.linux-amd64.tar.gz
-	sudo tar -C /usr/local -xzf go1.20.4.linux-amd64.tar.gz
+	wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
+	sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz
 	export PATH=$$PATH:/usr/local/go/bin
-	rm go1.20.4.linux-amd64.tar.gz
+	rm go1.22.2.linux-amd64.tar.gz
 
 	@echo "Installing frontend dependencies..."
 	cd frontend && npm install

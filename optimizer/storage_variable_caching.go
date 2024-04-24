@@ -10,8 +10,6 @@ import (
 
 // caches storage variables in local variables
 func (o *Optimizer) optimizeStorageVariableCaching() {
-	// TODO: check if the storage variable is read more than once
-	//       if it is, cache it in a local variable
 	contracts := o.builder.GetRoot().GetContracts()
 	for _, contract := range contracts {
 		// iterate through the contract's functions

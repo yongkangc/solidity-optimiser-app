@@ -12,7 +12,7 @@ contract OptimizedTest is Test {
 // Example test code
 function test() public view {
     // use the myContract variable to interact with the contract
-    myContract.increment();
+    myContract.calculateSumUnoptimized();
 }
     
 }

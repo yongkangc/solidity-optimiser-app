@@ -4,7 +4,7 @@ install:
 	bash ./install.sh
 
 build:
-	forge build
+	forge build --silent
 
 estimate:
 	forge test --gas-report
