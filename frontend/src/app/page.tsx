@@ -7,8 +7,8 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { motion } from "framer-motion";
 import { DiffEditor, Editor } from "@monaco-editor/react";
-import Ansi from "ansi-to-react";
 import EthIcon from "./ethereum-eth-logo.svg";
+import stripAnsi from "strip-ansi";
 
 type OptimizationOptions = {
   structPacking: boolean;
@@ -317,14 +317,9 @@ function test() public view {
               }
             />
             {estimationVisible && (
-              <div className="text-xs bg-stone-900 p-2">
-                {estimation.split("\n").map((estimation) => (
-                  <code>
-                    <br />
-                    <Ansi>{estimation}</Ansi>
-                  </code>
-                ))}
-              </div>
+              <SyntaxHighlighter language="bash" style={atomDark}>
+                {stripAnsi(estimation)}
+              </SyntaxHighlighter>
             )}
           </motion.form>
         </motion.div>
