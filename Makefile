@@ -1,4 +1,4 @@
-.PHONY: build build-optimizer build-backend update-submodules start run-frontend run-backend kill-all install-dependencies optimiser-test
+.PHONY: build build-optimizer build-backend update-submodules start run-frontend run-backend kill-all install-dependencies optimizer-test
 
 build:
 	mkdir -p build
@@ -15,10 +15,10 @@ build-backend:
 	go build -o ./build/backend ./backend/main.go
 	@echo "Backend built successfully!"
 
-optimiser-test:
-	@echo "Running Optimiser tests..."
+optimizer-test:
+	@echo "Running Optimizer tests..."
 	go test -v ./...
-	@echo "Optimiser tests passed successfully!"
+	@echo "Optimizer tests passed successfully!"
 
 
 update-submodules:

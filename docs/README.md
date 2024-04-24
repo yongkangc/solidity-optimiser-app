@@ -19,18 +19,20 @@ For more information on architecture and implementation, see the [docs](docs.md)
 
 ## Installation
 
-**Clone the Repository**
+1. Clone the Repository
 
 ```bash
 git clone --recurse-submodules https://github.com/yongkangc/solidity-optimiser-app.git
 ```
+
+2. Build the Go Project by running `make build`
 
 > [!NOTE]
 > Check out the [installation guide](installation.md) for detailed instructions on setting up the project.
 
 ## Usage
 
-- **CLI**: run `go run main.go` in project root to start the CLI tool.
+- **CLI**: run `./build/optimizer --help` in project root to get started with the CLI tool.
 - **Web App**: run `make start` to start the backend and frontend with tmux.
   - View the frontend at `http://localhost:3000`
 
@@ -40,7 +42,7 @@ git clone --recurse-submodules https://github.com/yongkangc/solidity-optimiser-a
 ## Running Tests
 
 ```bash
-make optimiser-test
+make optimizer-test
 ```
 
 ---
