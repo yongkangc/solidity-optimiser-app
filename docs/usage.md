@@ -1,11 +1,16 @@
 # Usage
 
-**CLI**
+1. Build binaries using `make build`
+2. Check that `./build/` exists
+
+**Run CLI**
 
 ```bash
-# Project root
-go run main.go
+./build/optimizer --help
 ```
+
+> [!IMPORTANT]
+> --file is a compulsory flag
 
 **Frontend**
 
@@ -17,6 +22,5 @@ npm run dev
 **Backend**
 
 ```bash
-cd backend
-go run main.go
+./build/backend
 ```
