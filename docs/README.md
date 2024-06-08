@@ -9,6 +9,9 @@ For more information on architecture and implementation, see the [docs](docs.md)
 > [!WARNING]
 > This code is a work in progress and can contain bugs. Use it at your own risk. Feature request and bug reports are welcome.
 
+
+Dev Writeup for design, architecture and process can be found [here](https://extremelysunnyyk.medium.com/from-idea-to-implementation-creating-a-solidity-gas-optimizer-for-smart-contracts-0a103c2bfd24)
+
 ## Requirements
 
 - `>= go1.22.2` [link](https://go.dev/doc/install)
