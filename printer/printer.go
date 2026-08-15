@@ -98,7 +98,7 @@ func (p *Printer) visitNode(node ast.Node[ast.NodeType], depth int) {
 		p.VisitTypeName(n, depth)
 	case ast_pb.NodeType_IDENTIFIER:
 		n := node.(*ast.PrimaryExpression)
-		p.output += n.GetName()
+		p.output += fmt.Sprintf("%s%s\n", strings.Repeat("  ", depth), n.GetName())
 		//
 	default:
 		p.output += fmt.Sprintf(strings.Repeat("  ", depth)+"Unknown Node: %v\n", node.GetType().String())
